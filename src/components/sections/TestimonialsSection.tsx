@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
-import { TESTIMONIALS } from '../../data/landingData';
+import { useTestimonials } from '../../hooks/useTestimonials';
 import testimonialsBg from '../../assets/image/3.jfif';
 import { useLanguage } from '../../context/LanguageContext';
 import { UI, pick } from '../../data/translations';
@@ -12,7 +12,12 @@ const staggerContainer: Variants = { hidden: { opacity: 0 }, visible: { opacity:
 const TestimonialsSection: React.FC = () => {
   const [active, setActive] = useState<number>(0);
   const { lang } = useLanguage();
+  const { testimonials, loading } = useTestimonials();
+  if (loading || testimonials.length === 0) {
+    return null;
+  }
   const tm = UI.testimonials;
+
 
   return (
     <section id="testimonials" className="gs-section" style={{ background: 'linear-gradient(180deg,#f8f9ff 0%,#e8eaf6 100%)' }}>
@@ -26,7 +31,7 @@ const TestimonialsSection: React.FC = () => {
           className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-12"
           variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }}
         >
-          {TESTIMONIALS.map((t, idx) => (
+          {testimonials.map((t, idx) => (
             <motion.div
               key={t.id}
               onClick={() => setActive(idx)}
@@ -40,18 +45,21 @@ const TestimonialsSection: React.FC = () => {
                 </span>
               )}
               <div className="flex items-center gap-3 mb-4">
-                <img src={t.avatar} alt={t.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-[#C9A84C]" />
+                <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  t.model
+                )}&background=1a237e&color=fff&size=80`}
+                  alt={t.model} className="w-12 h-12 rounded-full object-cover ring-2 ring-[#C9A84C]" />
                 <div>
-                  <h4 className="font-bold text-sm text-slate-900">{t.name}</h4>
-                  <p className="text-xs text-slate-500">{t.role}</p>
+                  <h4 className="font-bold text-sm text-slate-900">{t.model}</h4>
+                  <p className="text-xs text-slate-500">{t.name}</p>
                 </div>
               </div>
               <div className="flex gap-0.5 mb-3">
-                {[...Array(t.rating)].map((_, i) => (
+                {[...Array(Number(t.rating))].map((_, i) => (
                   <span key={`${t.id}-star-${i}`} className="text-yellow-400 text-base">★</span>
                 ))}
               </div>
-              <blockquote className="text-gray-500 text-sm leading-relaxed italic">"{t.text}"</blockquote>
+              <blockquote className="text-gray-500 text-sm leading-relaxed italic">"{t.message}"</blockquote>
             </motion.div>
           ))}
         </motion.div>

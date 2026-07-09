@@ -27,13 +27,16 @@ export interface ServiceCard {
 
 // ── Projects ─────────────────────────────────────────────────────
 export interface Project {
-  id: number;
-  name: string;
-  location: string;
-  category: 'Hotel' | 'Apartment' | 'Land';
-  image: string;
-  description: string;
-  tag?: string;
+    id: number;
+    title: string;
+    location: string;
+    description: string | null;
+    image?: string;
+
+    category?: {
+        id?: number;
+        title: string;
+    };
 }
 
 // ── Testimonials ─────────────────────────────────────────────────

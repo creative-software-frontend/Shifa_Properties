@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HERO_SLIDES } from '../../data/landingData';
+import { useBanners } from '../../hooks/useBanners';
 import { useLanguage } from '../../context/LanguageContext';
 import { UI, pick } from '../../data/translations';
 
@@ -9,6 +9,14 @@ const HeroSection: React.FC = () => {
   const [animating, setAnimating] = useState<boolean>(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { lang } = useLanguage();
+  const { banners } = useBanners();
+
+
+  const slideData = banners[current] ?? { image: '', title: '', ctaLink: '', id: 0, cta: {} };
+
+
+
+
 
   const goTo = (idx: number) => {
     if (animating || idx === current) return;
@@ -16,8 +24,10 @@ const HeroSection: React.FC = () => {
     setTimeout(() => { setCurrent(idx); setAnimating(false); }, 400);
   };
 
-  const next = () => goTo((current + 1) % HERO_SLIDES.length);
-  const prev = () => goTo((current - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+  const next = () => goTo((current + 1) % banners.length);
+  const prev = () => goTo(
+    (current - 1 + banners.length) % banners.length
+  );
 
   useEffect(() => {
     intervalRef.current = setInterval(next, 6000);
@@ -25,8 +35,8 @@ const HeroSection: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current]);
 
-  const slide = UI.heroSlides[current];
-  const slideData = HERO_SLIDES[current];
+  const slide = UI.heroSlides[current] || UI.heroSlides[0];
+
 
   return (
     <section
@@ -45,8 +55,8 @@ const HeroSection: React.FC = () => {
           style={{ zIndex: 1 }}
         >
           <img
-            src={slideData.image}
-            alt={pick(slide.title, lang)}
+            src={slideData.image || undefined}
+            alt={slideData.title}
             className="w-full h-full object-cover"
             loading="eager"
           />
@@ -79,7 +89,7 @@ const HeroSection: React.FC = () => {
               }}
             >
               <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#C9A84C' }} />
-              {pick(slide.badge, lang)}
+              Shifa Properties Ltd
             </motion.span>
 
             {/* Title */}
@@ -114,7 +124,7 @@ const HeroSection: React.FC = () => {
                 textShadow: '0px 2px 14px rgba(0, 0, 0, 0.60), 0px 1px 4px rgba(0, 0, 0, 0.40)',
               }}
             >
-              {pick(slide.subtitle, lang)}
+              {slideData.title}
             </motion.p>
 
             {/* CTA buttons */}
@@ -165,7 +175,7 @@ const HeroSection: React.FC = () => {
 
       {/* ── Slide dots ── */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5">
-        {HERO_SLIDES.map((_, i) => (
+        {banners.map((_, i) => (
           <button
             key={i}
             onClick={() => goTo(i)}
@@ -189,7 +199,7 @@ const HeroSection: React.FC = () => {
         </span>
         <span className="text-white/50 text-xs">/</span>
         <span className="text-white/60 text-xs tabular-nums">
-          {String(HERO_SLIDES.length).padStart(2, '0')}
+          {String(banners.length).padStart(2, '0')}
         </span>
       </div>
 

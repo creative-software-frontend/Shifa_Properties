@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import logoImg from '../assets/image/logo.jpeg';
-import logo from '../assets/image/logo2.png';
+import { useLogos } from "../hooks/useLogos";
 import LanguageToggle from './LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
 import { UI, pick } from '../data/translations';
+
 
 // Bilingual nav structure — labels come from translations, hrefs stay static
 const getNavLinks = (lang: 'EN' | 'BN') => [
@@ -36,6 +36,7 @@ const Navbar: React.FC = () => {
   const dropRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<number | null>(null);
   const { lang } = useLanguage();
+  const { websiteLogo, headerLogo } = useLogos();
 
   const NAV_LINKS = getNavLinks(lang);
 
@@ -55,6 +56,7 @@ const Navbar: React.FC = () => {
       if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     };
   }, []);
+
 
   const isScrolledPage = location.pathname !== '/';
 
@@ -129,7 +131,7 @@ const Navbar: React.FC = () => {
         {/* ── LEFT LOGO ── */}
         <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0" id="nav-logo-left">
           <img
-            src={logoImg}
+            src={websiteLogo}
             alt="Shifa Properties Ltd Group Logo"
             className="w-14 h-14 rounded-full object-contain transition-transform duration-300 group-hover:scale-105"
           />
@@ -242,7 +244,7 @@ const Navbar: React.FC = () => {
           {/* Right-side secondary logo */}
           <Link to="/" className="flex items-center gap-2 group" id="nav-logo-right">
             <img
-              src={logo}
+              src={headerLogo}
               alt="Shifa Properties Ltd Group"
               className="w-10 h-10 rounded-full object-contain bg-white border border-gold-300 shadow-gold transition-transform duration-300 group-hover:scale-105"
               style={{ padding: '0px' }}
