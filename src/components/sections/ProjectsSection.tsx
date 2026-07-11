@@ -3,7 +3,8 @@ import { PROJECTS } from '../../data/landingData';
 import type { Project } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 
-type Filter = 'All' | Project['category'];
+type Filter = 'All' | 'Hotel' | 'Apartment' | 'Land';
+
 const FILTERS: { value: Filter; label: { en: string; bn: string } }[] = [
   { value: 'All', label: { en: 'All', bn: 'সব' } },
   { value: 'Hotel', label: { en: 'Hotel', bn: 'হোটেল' } },
@@ -18,9 +19,13 @@ const ProjectsSection: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<Filter>('All');
   const [selected, setSelected] = useState<Project | null>(null);
 
-  const filtered = activeFilter === 'All'
+const filtered = activeFilter === 'All'
     ? PROJECTS
-    : PROJECTS.filter((p) => p.category === activeFilter);
+    : PROJECTS.filter((p) => {
+        const cat = p.category;
+        return typeof cat === 'string' ? cat === activeFilter : cat?.title === activeFilter;
+      });
+
 
   return (
     <section id="projects" className="gs-section bg-white py-20">
@@ -82,7 +87,8 @@ const ProjectsSection: React.FC = () => {
                 <div className="absolute top-4 left-4 flex gap-2">
                   <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase text-white"
                     style={{ background: 'rgba(26,35,126,0.85)' }}>
-                    {project.category}
+                    {typeof project.category === 'string' ? project.category : project.category?.title}
+
                   </span>
                   {project.tag && (
                     <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase"
@@ -157,7 +163,8 @@ const ProjectsSection: React.FC = () => {
             </div>
             <div className="p-6 md:p-8">
               <span className="inline-block px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-amber-50 text-amber-700 mb-3">
-                {selected.category}
+                {typeof selected.category === 'string' ? selected.category : selected.category?.title}
+
               </span>
               <h3
                 className="text-2xl font-bold mb-2"

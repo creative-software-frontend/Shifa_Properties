@@ -38,12 +38,14 @@ const TestimonialsSection: React.FC = () => {
               variants={fadeInUp}
               className={`gs-card p-6 cursor-pointer transition-all duration-300 ${active === idx ? 'ring-2 ring-[#C9A84C] scale-[1.02]' : ''}`}
             >
-              {t.badge && (
+              {(t as { badge?: string }).badge && (
                 <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold mb-4 tracking-wider uppercase"
                   style={{ background: 'linear-gradient(135deg,#C9A84C,#fde68a)', color: '#0D0D1A' }}>
-                  ✦ {t.badge}
+                  ✦ {(t as { badge?: string }).badge}
                 </span>
               )}
+
+
               <div className="flex items-center gap-3 mb-4">
                 <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
                   t.model

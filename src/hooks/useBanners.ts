@@ -4,12 +4,16 @@ const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 
 export interface Banner {
-id: number;
+  id: number;
   title: string;
   description: string;
   photo: string;
-  image: string; 
+  image: string;
+  // Used by HeroSection CTA logic.
+  ctaLink?: string;
+  cta?: Record<string, string>;
 }
+
 
 export const useBanners = () => {
   const [banners, setBanners] = useState<Banner[]>([]);

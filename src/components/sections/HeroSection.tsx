@@ -37,8 +37,9 @@ const slideData = banners[safeIndex] ?? {
   description: '',
   ctaLink: '',
   id: 0,
-  cta: {}
+  cta: {},
 };
+
 
 
 
@@ -167,13 +168,15 @@ const prev = () => {
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
               <a
-                href={slideData.ctaLink}
+                href={slideData.ctaLink || ''}
                 onClick={(e) => {
-                  if (slideData.ctaLink.startsWith('#')) {
+                  const ctaLink = slideData.ctaLink || '';
+                  if (ctaLink.startsWith('#')) {
                     e.preventDefault();
-                    document.querySelector(slideData.ctaLink)?.scrollIntoView({ behavior: 'smooth' });
+                    document.querySelector(ctaLink)?.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
+
                 id={`hero-cta-${slideData.id}`}
                 className="btn-gold font-semibold text-sm px-8 py-3.5 uppercase tracking-wider transition-transform duration-200 hover:scale-105"
                 style={{ boxShadow: '0 4px 15px rgba(0, 0, 0, 0.15)' }}

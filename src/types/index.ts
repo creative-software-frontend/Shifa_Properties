@@ -27,21 +27,36 @@ export interface ServiceCard {
 
 // ── Projects ─────────────────────────────────────────────────────
 export interface Project {
-    id: number;
-    title: string;
-    location: string;
-    description: string | null;
-    image?: string;
+  id: number;
+  // Some UIs use `name` instead of `title` (legacy / mock data).
+  title?: string;
+  name?: string;
+  location: string;
+  description: string | null;
+  image?: string;
 
-    category?: {
+  // Legacy UI fields.
+  tag?: string;
+
+  // Category may be a simple string (used by landingData mock) OR an object (used by API).
+  category?:
+    | string
+    | {
         id?: number;
         title: string;
-    };
+      };
 }
+
+
+
+
+
+
 
 // ── Testimonials ─────────────────────────────────────────────────
 export interface Testimonial {
   id: number;
+  // Fields differ between APIs/mocks (legacy vs newer).
   name: string;
   role: string;
   company: string;
@@ -49,7 +64,16 @@ export interface Testimonial {
   rating: number;
   text: string;
   badge?: string;
+  // Some sections use `model` naming based on a different backend shape.
+  model?: string;
+  message?: string;
+
+
 }
+
+
+
+
 
 // ── Stats ────────────────────────────────────────────────────────
 export interface Stat {

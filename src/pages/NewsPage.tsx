@@ -16,10 +16,13 @@ const NewsPage: React.FC = () => {
     'All',
     ...Array.from(
       new Set(
-        news.map((a) => a.news_type?.title).filter(Boolean)
+        news
+          .map((a) => a.news_type?.title)
+          .filter((t): t is string => typeof t === 'string' && t.length > 0)
       )
     ),
   ];
+
 
   const filtered =
     activeCategory === 'All'
@@ -64,8 +67,9 @@ const NewsPage: React.FC = () => {
             {categories.map((cat) => (
               <button
                 key={cat}
-                id={`news-filter-${cat.toLowerCase().replace(/\s+/g, '-')}`}
-                onClick={() => setActiveCategory(cat)}
+                id={`news-filter-${(cat || '').toLowerCase().replace(/\s+/g, '-')}`}
+                onClick={() => setActiveCategory(cat || 'All')}
+
                 className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 select-none
                 ${activeCategory === cat
                     ? 'text-white shadow-md scale-105'

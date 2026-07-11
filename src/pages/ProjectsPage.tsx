@@ -32,10 +32,11 @@ const ProjectsPage: React.FC = () => {
 
   const filtered = activeFilter === 'All'
     ? projects
-    : projects.filter(
-        (project) =>
-          project.category?.title === activeFilter
-      );
+    : projects.filter((project) => {
+        const cat = project.category;
+        return typeof cat === 'string' ? cat === activeFilter : cat?.title === activeFilter;
+      });
+
 
 
   return (
@@ -173,7 +174,8 @@ const ProjectsPage: React.FC = () => {
 
                     src={project.image || ''}
 
-                    alt={project.title}
+                    alt={project.title ?? project.name}
+
 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-104"
 
@@ -193,7 +195,10 @@ const ProjectsPage: React.FC = () => {
 
                     >
 
-                      {project.category?.title}
+                      {typeof project.category === 'string'
+                        ? project.category
+                        : project.category?.title}
+
 
                     </span>
 
@@ -220,7 +225,8 @@ const ProjectsPage: React.FC = () => {
 
                   >
 
-                    {project.title}
+                    {project.title ?? project.name}
+
 
                   </h3>
 
@@ -377,11 +383,12 @@ const ProjectsPage: React.FC = () => {
             <div className="p-6">
 
 
-              <h3 className="text-2xl font-bold mb-2">
+                  <h3 className="text-2xl font-bold mb-2">
 
-                {selected.title}
+                {selected.title ?? selected.name}
 
               </h3>
+
 
 
               <p className="text-gray-400">
