@@ -16,9 +16,9 @@ const NewsPage: React.FC = () => {
     'All',
     ...Array.from(
       new Set(
-        news
-          .map((a) => a.news_type?.title)
-          .filter((t): t is string => typeof t === 'string' && t.length > 0)
+        (news || [])
+          .map((a) => a?.news_type?.title || '')
+          .filter((t): t is string => typeof t === 'string' && t.trim().length > 0)
       )
     ),
   ];
@@ -64,21 +64,25 @@ const NewsPage: React.FC = () => {
 
           {/* ── CATEGORY FILTER TABS ── */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
-            {categories.map((cat) => (
+            {(categories || []).map((cat) => {
+              const safeCat = typeof cat === 'string' ? cat : '';
+              const filterId = safeCat.toLowerCase().replace(/\s+/g, '-');
+              
+              return (
               <button
-                key={cat}
-                id={`news-filter-${(cat || '').toLowerCase().replace(/\s+/g, '-')}`}
-                onClick={() => setActiveCategory(cat || 'All')}
+                key={safeCat || 'All'}
+                id={`news-filter-${filterId}`}
+                onClick={() => setActiveCategory(safeCat || 'All')}
 
                 className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 select-none
-                ${activeCategory === cat
+                ${activeCategory === safeCat
                     ? 'text-white shadow-md scale-105'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                style={activeCategory === cat ? { background: 'linear-gradient(135deg, var(--color-primary, #1a237e), #0288D1)' } : {}}
+                style={activeCategory === safeCat ? { background: 'linear-gradient(135deg, var(--color-primary, #1a237e), #0288D1)' } : {}}
               >
-                {cat === 'All' ? (lang === 'EN' ? 'All' : 'সব') : cat}
+                {safeCat === 'All' ? (lang === 'EN' ? 'All' : 'সব') : safeCat}
               </button>
-            ))}
+            )})}
           </div>
 
           {/* ── FEATURED HERO ARTICLE LAYER (First item when view state is set to 'All') ── */}
