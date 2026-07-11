@@ -1,13 +1,15 @@
-# TODO - Fix blank white screen after Navbar logo migration
+- [x] Inspect existing Contact form component and identify mocked submit logic
+- [x] Implement real API POST to /v1/contact-store in ContactSection.tsx
 
-- [ ] Inspect current implementation of Navbar and logo hook
-- [x] Identify unsafe API response access in `useWebsiteLogo`
-- [ ] Update `src/hooks/useWebsiteLogo.ts`:
-  - [ ] Use optional chaining for `response.data.data.header_logo.file_path`
-  - [ ] Never throw in the hook
-  - [ ] Keep API logo as primary
-  - [ ] Fallback to local `src/assets/image/logo.jpeg` when API fails or field is missing
-- [ ] Ensure Navbar renders during loading/failure (hook returns a valid string immediately)
-- [ ] Run TypeScript/build check
-- [ ] Confirm the website no longer shows a blank white screen
+- [x] Map existing “I am Interested In” dropdown value to investment_category_id
+
+- [x] Preserve success UI/screen behavior and keep form values intact on failure
+
+- [x] Handle Laravel validation errors: display first validation error message without resetting form
+
+- [x] Add internal loading/disabled behavior without changing layout/visual styling
+
+- [x] Run npm run build and ensure zero TypeScript errors
+
+
 

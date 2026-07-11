@@ -5,6 +5,8 @@ import { Phone, Mail, MessageSquare, Briefcase, MapPin } from 'lucide-react';
 import officeImg from '../../assets/image/bd4d72ea-ec2b-405e-b8e7-d09eb87cf0bd.jfif';
 import { useLanguage } from '../../context/LanguageContext';
 import { UI, pick } from '../../data/translations';
+import api from '../../utils/api';
+import { useInvestmentCategories } from '../../hooks/useInvestmentCategories';
 
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -21,34 +23,80 @@ const OFFICES = [
   { name: 'Uttara Office', address: '2nd & 3rd Floor, House 18 & 20, Road 6/C, ACM & MF Tower, Dhaka 1230', email: 'sales@shifapropertiesltd.com.bd', cell: '01894944666', hotline: '+8809610066666', mapUrl: 'https://maps.google.com/?q=Shifa+Properties+Ltd+Group+Uttara+Dhaka', mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3648.5!2d90.3997!3d23.8759!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDUyJzMyLjkiTiA5MMKwMjMnNTguNiJF!5e0!3m2!1sen!2sbd!4v1' },
 ];
 
-const INTEREST_VALUES = [
-  'Hotel Suite Investment',
-  'Padma Grand Hotel booking',
-  'Land Purchases OCDL',
-  'Careers',
-  'General Query',
-];
 
 const ContactSection: React.FC = () => {
   const { lang } = useLanguage();
   const c = UI.contact;
 
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: 'Hotel Suite Investment', message: '' });
-  const [submitted, setSubmitted] = useState(false);
+  const { categories, loading: categoriesLoading } = useInvestmentCategories();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', investment_category_id: '', message: '' });
+  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string>('');
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({ name: '', email: '', phone: '', subject: 'Hotel Suite Investment', message: '' });
-    }, 4000);
+
+    if (isSubmitting) return;
+
+    setSubmitError('');
+    setIsSubmitting(true);
+
+    const investment_category_id = Number(formData.investment_category_id);
+
+    if (!investment_category_id) {
+      setSubmitError('Please select a valid investment category.');
+      setIsSubmitting(false);
+      return;
+    }
+
+
+    try {
+      const payload = {
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        investment_category_id,
+        message: formData.message,
+      };
+
+      const res = await api.post('/v1/contact-store', payload);
+      const data = res?.data as { success?: boolean; message?: string };
+
+      if (data?.success) {
+        setSubmitted(true);
+        setTimeout(() => {
+          setSubmitted(false);
+          setSubmitError('');
+          setFormData({ name: '', email: '', phone: '', investment_category_id: '', message: '' });
+          setIsSubmitting(false);
+        }, 4000);
+      } else {
+        setSubmitError(data?.message ?? 'Contact submission failed.');
+        setIsSubmitting(false);
+      }
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: Record<string, unknown> } };
+
+      const validationErrors = axiosErr?.response?.data?.errors as Record<string, string[]> | undefined;
+      const firstValidationMessage: string | undefined = validationErrors
+        ? (Object.values(validationErrors)[0]?.[0] as string | undefined)
+        : undefined;
+
+      setSubmitError(firstValidationMessage ?? (axiosErr?.response?.data?.message as string | undefined) ?? 'Contact submission failed.');
+
+      setIsSubmitting(false);
+    }
+
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+
 
   return (
     <section id="contact" className="overflow-hidden">
@@ -252,11 +300,12 @@ const ContactSection: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="md:col-span-1 space-y-2">
                       <label className="block text-xs font-bold uppercase tracking-wider text-black">{pick(c.interestLabel, lang)}</label>
-                      <select name="subject" value={formData.subject} onChange={handleInputChange}
+                      <select name="investment_category_id" value={formData.investment_category_id} onChange={handleInputChange}
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all appearance-none cursor-pointer"
                         style={{ backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='%23000000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>")`, backgroundPosition: 'right 12px center', backgroundRepeat: 'no-repeat', backgroundSize: '16px' }}>
-                        {c.interests.map((item, i) => (
-                          <option key={i} value={INTEREST_VALUES[i]}>{pick(item, lang)}</option>
+                        <option value="" disabled>{categoriesLoading ? 'Loading categories...' : 'Select Investment Category'}</option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.id}>{cat.title}</option>
                         ))}
                       </select>
                     </div>
@@ -271,12 +320,17 @@ const ContactSection: React.FC = () => {
                   <div className="text-center pt-2">
                     <button
                       type="submit"
+                      disabled={isSubmitting}
                       className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-900 via-blue-700 to-sky-500 hover:from-blue-950 hover:to-sky-600 text-white px-14 py-3.5 text-xs font-black uppercase tracking-wider shadow-md hover:shadow-lg transition-all duration-300 rounded-full transform hover:scale-[1.01]"
                     >
                       <span>{pick(c.sendBtn, lang)}</span>
                       <span className="text-sm font-light select-none">→</span>
                     </button>
+                    <p className="mt-2 text-xs text-red-600 min-h-[14px]" aria-live="polite">
+                      {submitError ? submitError : ''}
+                    </p>
                   </div>
+
                 </form>
               )}
             </div>
