@@ -48,27 +48,58 @@ const CareerPage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<string>('');
+  const [formErrorMessage, setFormErrorMessage] = useState<string>('');
+  void formErrorMessage;
+
+
+
+
+
+
+
+
+
+
+
 
   const handleApplyClick = (job: Job) => {
     setSelectedJob(job);
     setSubmitSuccess(false);
     setIsDrawerOpen(true);
-    document.body.style.overflow = 'hidden';
+    // Preserve existing UX behavior.
+    if (typeof document !== 'undefined') {
+      void (document.body.style.overflow = 'hidden');
+
+    }
+
+
   };
+
+
 
   const closeDrawer = () => {
     setIsDrawerOpen(false);
-    document.body.style.overflow = 'auto';
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = 'auto';
+    }
     setTimeout(() => {
       setSelectedJob(null);
       setSelectedFile(null);
       setSubmitSuccess(false);
+      setSubmitMessage('');
+      setFormErrorMessage('');
     }, 400);
   };
 
+
   useEffect(() => {
-    return () => { document.body.style.overflow = 'auto'; };
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
   }, []);
+
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -79,14 +110,76 @@ const CareerPage: React.FC = () => {
   // Modern Dynamic Form Submission API Handler
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!selectedJob) return;
+    if (!selectedFile) return;
+
     setIsSubmitting(true);
+    setSubmitMessage('');
 
-    // Mock network transmission payload latency latency delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    setIsSubmitting(false);
+    try {
+      const formEl = e.currentTarget;
+
+      const formData = new FormData();
+      formData.append('id', String(selectedJob.id));
+
+      const fullName = formEl.querySelector<HTMLInputElement>('input[type="text"]');
+      const email = formEl.querySelector<HTMLInputElement>('input[type="email"]');
+      const phone = formEl.querySelector<HTMLInputElement>('input[type="tel"]');
+      const coverLetter = formEl.querySelector<HTMLTextAreaElement>('textarea');
+
+      formData.append('full_name', fullName?.value ?? '');
+      formData.append('email', email?.value ?? '');
+      formData.append('phone', phone?.value ?? '');
+      formData.append('cover_letter', coverLetter?.value ?? '');
+      formData.append('resume', selectedFile);
+
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/job-applications`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      // Success can be a JSON payload containing message
+      const data: unknown = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        // Laravel validation shape examples:
+        // { message: '...', errors: { field: ['msg'] } }
+      type LaravelErrors = Record<string, string[] | string>;
+      type LaravelResponse = {
+        message?: string;
+        errors?: LaravelErrors;
+      };
+
+      const anyData = data as LaravelResponse;
+      const errors = anyData?.errors;
+
+      let firstMsg = '';
+      if (errors && typeof errors === 'object') {
+        const firstKey = Object.keys(errors)[0];
+        const val = errors[firstKey];
+        if (Array.isArray(val) && val.length > 0) firstMsg = String(val[0]);
+        else if (typeof val === 'string') firstMsg = val;
+      }
+
+      const fallback = anyData?.message ? String(anyData.message) : '';
+      throw new Error(firstMsg || fallback || 'Request failed');
+    }
+
+    const successMsg = (data as { message?: unknown }).message ? String((data as { message?: unknown }).message) : '';
+    setSubmitMessage(successMsg);
     setSubmitSuccess(true);
+
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Request failed';
+      setFormErrorMessage(msg);
+      setSubmitSuccess(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   return (
     <PageTransition>
@@ -405,11 +498,14 @@ const CareerPage: React.FC = () => {
                       {lang === 'EN' ? 'Application Transmitted!' : 'আবেদন সফলভাবে পাঠানো হয়েছে!'}
                     </h4>
                     <p className="text-sm text-[var(--color-gray)] max-w-sm leading-relaxed">
-                      {lang === 'EN'
-                        ? 'Thank you for your interest. Shifa Properties Ltd acquisition unit has cataloged your resume and credentials successfully.'
-                        : 'আমাদের সাথে যোগাযোগ করার জন্য ধন্যবাদ। শিফা প্রপার্টিজ লিমিটেডের নিয়োগকারী দল আপনার জীবনবৃত্তান্ত সফলভাবে সংরক্ষণ করেছে।'
-                      }
+                      {submitMessage
+                        ? submitMessage
+                        : (lang === 'EN'
+                          ? 'Thank you for your interest. Shifa Properties Ltd acquisition unit has cataloged your resume and credentials successfully.'
+                          : 'আমাদের সাথে যোগাযোগ করার জন্য ধন্যবাদ। শিফা প্রপার্টিজ লিমিটেডের নিয়োগকারী দল আপনার জীবনবৃত্তান্ত সফলভাবে সংরক্ষণ করেছে।'
+                        )}
                     </p>
+
                     <button
                       onClick={closeDrawer}
                       className="mt-4 text-sm font-bold text-[var(--color-accent)] bg-sky-50 hover:bg-sky-100 px-6 py-2.5 rounded-full transition-colors"
