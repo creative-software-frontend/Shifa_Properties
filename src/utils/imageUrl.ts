@@ -12,11 +12,12 @@ export const getImageUrl = (path: string) => {
 // Backend remains the source of truth for all business fields.
 const defaultProjectImage = img0;
 
-export const PROJECT_FALLBACK_IMAGES: Record<number, string> = {
-    1: img4,
-    2: img5,
-    3: img7,
-    4: img0,
+const PROJECT_FALLBACK_BY_TITLE: Record<string, string> = {
+    'Padma Grand Hotel': img4,
+    'Bay Sands Hotel': img5,
+    'One City Residences': img7,
+    'Kuakata Hotel': img0,
+    'Kuakata Hotel test': img0,
 };
 
 const isNonEmptyString = (v: unknown): v is string =>
@@ -26,9 +27,9 @@ export const getProjectImage = (project: Project | null | undefined): string => 
     const backendImage = project?.image;
     if (isNonEmptyString(backendImage)) return backendImage;
 
-    const id = project?.id;
-    if (typeof id === 'number' && PROJECT_FALLBACK_IMAGES[id]) {
-        return PROJECT_FALLBACK_IMAGES[id];
+    const title = (project?.title ?? project?.name ?? '').trim();
+    if (title && PROJECT_FALLBACK_BY_TITLE[title]) {
+        return PROJECT_FALLBACK_BY_TITLE[title];
     }
 
     // Keep safe default; use local image assets only.
