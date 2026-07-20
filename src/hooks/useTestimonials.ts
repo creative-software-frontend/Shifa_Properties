@@ -7,6 +7,7 @@ export interface Testimonial {
   company: string;
   rating: string;
   message: string;
+  image?: string;
 }
 
 export const useTestimonials = () => {

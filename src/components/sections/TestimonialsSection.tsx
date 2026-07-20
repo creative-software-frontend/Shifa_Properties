@@ -5,6 +5,7 @@ import { useTestimonials } from '../../hooks/useTestimonials';
 import testimonialsBg from '../../assets/image/3.jfif';
 import { useLanguage } from '../../context/LanguageContext';
 import { UI, pick } from '../../data/translations';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const fadeInUp: Variants = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } } };
 const staggerContainer: Variants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.15 } } };
@@ -47,7 +48,7 @@ const TestimonialsSection: React.FC = () => {
 
 
               <div className="flex items-center gap-3 mb-4">
-                <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                <img src={t.image ? getImageUrl(t.image) : `https://ui-avatars.com/api/?name=${encodeURIComponent(
                   t.model
                 )}&background=1a237e&color=fff&size=80`}
                   alt={t.model} className="w-12 h-12 rounded-full object-cover ring-2 ring-[#C9A84C]" />

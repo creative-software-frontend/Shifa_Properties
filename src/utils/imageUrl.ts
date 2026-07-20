@@ -2,10 +2,11 @@ import { img0, img4, img5, img7 } from '../data/landingData';
 
 import type { Project } from '../types';
 
-const IMAGE_BASE_URL = import.meta.env.VITE_API_BASE_URL.replace("/api", "");
+const IMAGE_BASE_URL = import.meta.env.VITE_FILE_BASE_URL;
 export const getImageUrl = (path: string) => {
     if (!path) return "";
-    return `${IMAGE_BASE_URL}/${path}`;
+    const cleanPath = path.replace(/^\/+/, "");
+    return `${IMAGE_BASE_URL.replace(/\/$/, "")}/${cleanPath}`;
 };
 
 // Image-only fallback for Project cards.
