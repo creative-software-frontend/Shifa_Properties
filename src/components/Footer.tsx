@@ -129,36 +129,6 @@ const { footerLogo } = useLogos();
     }
   ];
 
-  const OFFICE_LOCATIONS = [
-    {
-      title: "CORPORATE HEAD OFFICE",
-      address: "47, Nassa Heights, Gulshan South Avenue, Gulshan-1, Dhaka.",
-      email: "sales@shifapropertiesltd.com.bd",
-      cell: "01877715333",
-      hotline: "+8809610066666",
-      mapSrc: "https://maps.google.com/maps?q=47%20Nassa%20Heights,%20Gulshan%20South%20Avenue,%20Gulshan-1,%20Dhaka&t=&z=14&ie=UTF8&iwloc=&output=embed",
-      mapLink: "https://maps.google.com/?q=47+Nassa+Heights+Gulshan+South+Avenue+Gulshan-1+Dhaka"
-    },
-    {
-      title: "MOHAKHALI DOHS OFFICE",
-      address: "Plot-39B (1st Floor), Road-29, New DOHS Mohakhali, Dhaka",
-      email: "sales@shifapropertiesltd.com.bd",
-      cell: "01222845560",
-      hotline: "+8809610066666",
-      mapSrc: "https://maps.google.com/maps?q=New%20DOHS%20Mohakhali,%20Dhaka&t=&z=14&ie=UTF8&iwloc=&output=embed",
-      mapLink: "https://maps.google.com/?q=New+DOHS+Mohakhali+Dhaka"
-    },
-    {
-      title: "UTTARA OFFICE",
-      address: "2nd & 3rd Floor, House 18 & 20, Road 6/C, ACM & MF Tower, Dhaka 1230",
-      email: "sales@shifapropertiesltd.com.bd",
-      cell: "01894944666",
-      hotline: "+8809610066666",
-      mapSrc: "https://maps.google.com/maps?q=Uttara%20Dhaka&t=&z=14&ie=UTF8&iwloc=&output=embed",
-      mapLink: "https://maps.google.com/?q=Uttara+Dhaka"
-    }
-  ];
-
   return (
     <footer
       id="contact"
@@ -249,52 +219,6 @@ const { footerLogo } = useLogos();
             })}
           </div>
 
-        </div>
-
-        {/* OFFICE LOCATIONS MAP CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-12 border-b border-slate-800/40">
-          {OFFICE_LOCATIONS.map((loc, idx) => (
-            <div key={idx} className="flex flex-col space-y-4">
-              <div className="h-40 w-full relative rounded-xl overflow-hidden border border-slate-800 shadow-inner">
-                <iframe
-                  title={`Map of ${loc.title}`}
-                  src={loc.mapSrc}
-                  className="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-500 opacity-80 hover:opacity-100"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                ></iframe>
-              </div>
-              <div className="flex flex-col flex-grow">
-                <h4 className="text-white font-bold text-xs tracking-widest uppercase mb-3">{loc.title}</h4>
-                <div className="space-y-2 text-xs text-slate-200 mb-4 flex-grow">
-                  <div className="grid grid-cols-[60px_1fr] gap-2">
-                    <span className="font-semibold text-slate-400">Address:</span>
-                    <span className="leading-relaxed text-white">{loc.address}</span>
-                  </div>
-                  <div className="grid grid-cols-[60px_1fr] gap-2">
-                    <span className="font-semibold text-slate-400">Email:</span>
-                    <a href={`mailto:${loc.email}`} className="text-[#e0c26c] hover:underline transition-colors">{loc.email}</a>
-                  </div>
-                  <div className="grid grid-cols-[60px_1fr] gap-2">
-                    <span className="font-semibold text-slate-400">Cell:</span>
-                    <a href={`tel:${loc.cell}`} className="text-white hover:text-[#C9A84C] transition-colors">{loc.cell}</a>
-                  </div>
-                  <div className="grid grid-cols-[60px_1fr] gap-2">
-                    <span className="font-semibold text-slate-400">Hotline:</span>
-                    <a href={`tel:${loc.hotline}`} className="text-white hover:text-[#C9A84C] transition-colors">{loc.hotline}</a>
-                  </div>
-                </div>
-                <a
-                  href={loc.mapLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-[#C9A84C] transition-colors uppercase tracking-wider"
-                >
-                  View Map <ArrowUpRight className="w-3 h-3" />
-                </a>
-              </div>
-            </div>
-          ))}
         </div>
 
         {/* MIDDLE LAYER */}

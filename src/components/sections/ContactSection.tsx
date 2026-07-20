@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 // Premium Icons replacing primitive emojis to handle alignment cleaner
-import { Phone, Mail, MessageSquare, Briefcase, MapPin } from 'lucide-react';
+import { Phone, Mail, MessageSquare, Briefcase } from 'lucide-react';
 import officeImg from '../../assets/image/bd4d72ea-ec2b-405e-b8e7-d09eb87cf0bd.jfif';
 import { useLanguage } from '../../context/LanguageContext';
 import { UI, pick } from '../../data/translations';
@@ -12,17 +12,6 @@ const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } }
 };
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
-};
-
-const OFFICES = [
-  { name: 'Corporate Head Office', address: '47, Nassa Heights, Gulshan South Avenue, Gulshan-1, Dhaka.', email: 'sales@shifapropertiesltd.com.bd', cell: '01877715333', hotline: '+8809610066666', mapUrl: 'https://maps.google.com/?q=Shifa+Properties+Ltd+Group+Gulshan+Dhaka', mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.546!2d90.4125!3d23.7937!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDQ3JzM3LjMiTiA5MMKwMjQnNDUuMCJF!5e0!3m2!1sen!2sbd!4v1' },
-  { name: 'Mohakhali DOHS Office', address: 'Plot-39B (1st Floor), Road-29, New DOHS Mohakhali, Dhaka', email: 'sales@shifapropertiesltd.com.bd', cell: '01222845560', hotline: '+8809610066666', mapUrl: 'https://maps.google.com/?q=Mohakhali+DOHS+Dhaka', mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.2!2d90.4005!3d23.7966!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDQ3JzQ3LjciTiA5MMKwMjQnMS44IkU!5e0!3m2!1sen!2sbd!4v1' },
-  { name: 'Uttara Office', address: '2nd & 3rd Floor, House 18 & 20, Road 6/C, ACM & MF Tower, Dhaka 1230', email: 'sales@shifapropertiesltd.com.bd', cell: '01894944666', hotline: '+8809610066666', mapUrl: 'https://maps.google.com/?q=Shifa+Properties+Ltd+Group+Uttara+Dhaka', mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3648.5!2d90.3997!3d23.8759!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDUyJzMyLjkiTiA5MMKwMjMnNTguNiJF!5e0!3m2!1sen!2sbd!4v1' },
-];
-
 
 const ContactSection: React.FC = () => {
   const { lang } = useLanguage();
@@ -191,65 +180,6 @@ const ContactSection: React.FC = () => {
               </div>
 
             </div>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* ── OFFICE LOCATIONS ── */}
-      <div className="py-16 px-4" style={{ background: '#e8f4fd' }}>
-        <div className="max-w-7xl mx-auto">
-          <motion.h2 className="text-center font-black text-2xl md:text-3xl mb-12 text-black"
-            style={{ fontFamily: 'Playfair Display, serif' }}
-            variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }}>
-            {pick(c.officesTitle, lang)}
-          </motion.h2>
-
-          <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }}>
-            {OFFICES.map((office) => (
-              <motion.div key={office.name} variants={fadeInUp}
-                className="bg-white rounded-2xl overflow-hidden shadow border border-sky-100 hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between">
-                <div>
-                  <div className="relative h-40 bg-sky-50 overflow-hidden">
-                    <iframe src={office.mapEmbed} width="100%" height="100%" style={{ border: 0 }}
-                      allowFullScreen={false} loading="lazy" referrerPolicy="no-referrer-when-downgrade"
-                      title={office.name} className="w-full h-full" />
-                    <a href={office.mapUrl} target="_blank" rel="noopener noreferrer"
-                      className="absolute top-2 left-2 bg-white text-xs font-bold px-3 py-1 rounded-full shadow flex items-center gap-1 text-black">
-                      <MapPin className="w-3 h-3 text-black" />
-                      {pick(c.mapsLink, lang)}
-                    </a>
-                  </div>
-                  <div className="p-5">
-                    <h3 className="font-black text-sm text-center mb-4 uppercase tracking-wide text-black">{office.name}</h3>
-                    <div className="space-y-2 text-xs">
-                      <div className="flex gap-2">
-                        <span className="text-gray-400 w-16 flex-shrink-0">{pick(c.addressLabel, lang)}</span>
-                        <span className="text-gray-700">{office.address}</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <span className="text-gray-400 w-16 flex-shrink-0">{pick(c.emailLabel, lang)}</span>
-                        <a href={`mailto:${office.email}`} className="text-neutral-900 font-semibold hover:underline truncate">{office.email}</a>
-                      </div>
-                      <div className="flex gap-2">
-                        <span className="text-gray-400 w-16 flex-shrink-0">{pick(c.cellLabel, lang)}</span>
-                        <a href={`tel:${office.cell}`} className="text-gray-700 hover:text-black font-medium">{office.cell}</a>
-                      </div>
-                      <div className="flex gap-2">
-                        <span className="text-gray-400 w-16 flex-shrink-0">{pick(c.hotlineLabel, lang)}</span>
-                        <a href={`tel:${office.hotline}`} className="text-gray-700 hover:text-black font-medium">{office.hotline}</a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="px-5 pb-5">
-                  <a href={office.mapUrl} target="_blank" rel="noopener noreferrer"
-                    className="block w-full text-center text-sm font-bold py-2 rounded-full border-2 border-black text-black bg-transparent hover:bg-black hover:text-white transition-all duration-200">
-                    {pick(c.viewMap, lang)}
-                  </a>
-                </div>
-              </motion.div>
-            ))}
           </motion.div>
         </div>
       </div>
