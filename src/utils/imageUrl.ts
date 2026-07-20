@@ -25,8 +25,8 @@ const isNonEmptyString = (v: unknown): v is string =>
     typeof v === 'string' && v.trim().length > 0;
 
 export const getProjectImage = (project: Project | null | undefined): string => {
-    const backendImage = project?.image;
-    if (isNonEmptyString(backendImage)) return backendImage;
+    const backendImage = project?.photo ?? project?.image;
+    if (isNonEmptyString(backendImage)) return getImageUrl(backendImage);
 
     const title = (project?.title ?? project?.name ?? '').trim();
     if (title && PROJECT_FALLBACK_BY_TITLE[title]) {

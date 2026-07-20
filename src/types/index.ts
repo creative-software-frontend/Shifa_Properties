@@ -34,9 +34,13 @@ export interface Project {
   location: string;
   description: string | null;
   image?: string;
+  photo?: string;
 
   // Legacy UI fields.
   tag?: string;
+
+  // Backend status field (e.g. 'active' | 'inactive').
+  status?: string;
 
   // Category may be a simple string (used by landingData mock) OR an object (used by API).
   category?:

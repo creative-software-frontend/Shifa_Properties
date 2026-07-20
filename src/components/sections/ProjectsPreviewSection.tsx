@@ -2,10 +2,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { PROJECTS } from '../../data/landingData';
+import { useProjects } from '../../hooks/useProjects';
 import type { Project } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { UI, pick } from '../../data/translations';
+import { getProjectImage } from '../../utils/imageUrl';
 
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -21,7 +22,10 @@ const ProjectsPreviewSection: React.FC = () => {
   const { lang } = useLanguage();
   const navigate = useNavigate();
   const p = UI.projects;
-  const displayProjects = PROJECTS.slice(0, 4);
+  const { projects, loading } = useProjects();
+  const displayProjects = projects
+    .filter((pr) => pr.status === undefined || pr.status === 'active')
+    .slice(0, 4);
 
   return (
     <section id="projects" className="gs-section bg-white py-16">
@@ -52,7 +56,9 @@ const ProjectsPreviewSection: React.FC = () => {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"
           variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }}
         >
-          {displayProjects.map((project) => (
+          {loading ? (
+            <p className="col-span-full text-center text-gray-400 text-sm py-10">Loading projects…</p>
+          ) : displayProjects.map((project) => (
             <motion.div
               key={project.id} variants={fadeInUp}
               className="bg-white rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 group select-none"
@@ -64,7 +70,7 @@ const ProjectsPreviewSection: React.FC = () => {
               <div className="relative h-56 overflow-hidden">
                 <motion.img
                   whileHover={{ scale: 1.05 }} transition={{ duration: 0.6 }}
-                  src={project.image} alt={project.name} className="w-full h-full object-cover"
+                  src={getProjectImage(project)} alt={project.title ?? project.name} className="w-full h-full object-cover"
                 />
                 {project.tag && (
                   <div className="absolute top-4 left-4">
@@ -81,7 +87,7 @@ const ProjectsPreviewSection: React.FC = () => {
                   className="font-bold text-base mb-2 transition-colors duration-200 group-hover:text-amber-600"
                   style={{ fontFamily: "'Playfair Display', serif", color: 'var(--color-dark, #000000)' }}
                 >
-                  {project.name}
+                  {project.title ?? project.name}
                 </h3>
                 <p className="text-[11px] text-gray-400 mb-3 flex items-center gap-1 font-medium">
                   📍 {project.location || 'Bangladesh'}
@@ -126,7 +132,7 @@ const ProjectsPreviewSection: React.FC = () => {
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
             >
               <div className="relative h-64">
-                <img src={selected.image} alt={selected.name} className="w-full h-full object-cover" />
+                <img src={getProjectImage(selected)} alt={selected.title ?? selected.name} className="w-full h-full object-cover" />
                 <button
                   onClick={() => setSelected(null)}
                   className="absolute top-4 right-4 bg-black/40 hover:bg-black/60 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm transition-colors"
@@ -139,7 +145,7 @@ const ProjectsPreviewSection: React.FC = () => {
                   className="text-2xl font-bold mb-3"
                   style={{ fontFamily: "'Playfair Display', serif", color: 'var(--color-dark, #000000)' }}
                 >
-                  {selected.name}
+                  {selected.title ?? selected.name}
                 </h3>
                 <p className="text-gray-500 text-sm leading-relaxed mb-6">{selected.description}</p>
                 <button

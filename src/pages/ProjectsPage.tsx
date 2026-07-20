@@ -4,16 +4,20 @@ import type { Project } from '../types';
 import PageTransition from '../components/PageTransition';
 import { useLanguage } from '../context/LanguageContext';
 import { useProjects } from '../hooks/useProjects';
+import { useProjectCategories } from '../hooks/useProjectCategories';
 import { getProjectImage } from '../utils/imageUrl';
 
-type Filter = 'All' | 'Hotel' | 'Apartment' | 'Land';
+type Filter = string;
 
-const FILTERS: { value: Filter; label: { en: string; bn: string } }[] = [
-  { value: 'All', label: { en: 'All', bn: 'সব' } },
-  { value: 'Hotel', label: { en: 'Hotel', bn: 'হোটেল' } },
-  { value: 'Apartment', label: { en: 'Apartment', bn: 'অ্যাপার্টমেন্ট' } },
-  { value: 'Land', label: { en: 'Land', bn: 'জমি' } },
-];
+const FALLBACK_CATEGORIES = ['Hotel', 'Apartment', 'Land'];
+
+const buildFilters = (titles: string[]) => {
+  const values = ['All', ...titles];
+  return values.map((value) => ({
+    value,
+    label: { en: value, bn: value },
+  }));
+};
 
 const ProjectsPage: React.FC = () => {
 
@@ -25,6 +29,11 @@ const ProjectsPage: React.FC = () => {
   const navigate = useNavigate();
 
   const { projects, loading } = useProjects();
+  const { categories } = useProjectCategories();
+
+  const FILTERS = buildFilters(
+    categories.length ? categories.map((c) => c.title) : FALLBACK_CATEGORIES
+  );
 
   const [activeFilter, setActiveFilter] = useState<Filter>('All');
 

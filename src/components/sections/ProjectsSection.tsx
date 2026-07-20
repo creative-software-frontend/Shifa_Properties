@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PROJECTS } from '../../data/landingData';
+import { useProjects } from '../../hooks/useProjects';
 import type { Project } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { getProjectImage } from '../../utils/imageUrl';
@@ -20,9 +20,14 @@ const ProjectsSection: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<Filter>('All');
   const [selected, setSelected] = useState<Project | null>(null);
 
+  const { projects, loading } = useProjects();
+
+  // Only show projects marked active by the backend.
+  const activeProjects = projects.filter((p) => p.status === undefined || p.status === 'active');
+
 const filtered = activeFilter === 'All'
-    ? PROJECTS
-    : PROJECTS.filter((p) => {
+    ? activeProjects
+    : activeProjects.filter((p) => {
         const cat = p.category;
         return typeof cat === 'string' ? cat === activeFilter : cat?.title === activeFilter;
       });
@@ -72,6 +77,11 @@ const filtered = activeFilter === 'All'
         </div>
 
         {/* ── PROJECT GRID ── */}
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <span className="text-gray-400 text-sm">Loading projects…</span>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {filtered.map((project, idx) => (
             <div
@@ -83,7 +93,7 @@ const filtered = activeFilter === 'All'
             >
               {/* Image & Tags display */}
               <div className="relative h-64 md:h-72 overflow-hidden">
-                <img src={getProjectImage(project)} alt={project.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-104" />
+                <img src={getProjectImage(project)} alt={project.title ?? project.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-104" />
 
                 <div className="absolute top-4 left-4 flex gap-2">
                   <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase text-white"
@@ -115,7 +125,7 @@ const filtered = activeFilter === 'All'
                     className="font-bold text-lg transition-colors duration-200 group-hover:text-amber-600"
                     style={{ color: 'var(--color-dark, #000000)', fontFamily: "'Playfair Display', serif" }}
                   >
-                    {project.name}
+                    {project.title ?? project.name}
                   </h3>
                 </div>
                 <div className="flex items-center gap-1 text-[11px] text-gray-400 mb-3 font-medium">
@@ -136,10 +146,11 @@ const filtered = activeFilter === 'All'
             </div>
           ))}
         </div>
+        )}
 
         {/* ── DOT NAVIGATION DISPLAY ── */}
         <div className="flex justify-center gap-2 mt-12">
-          {PROJECTS.map((_, i) => (
+          {filtered.map((_, i) => (
             <span key={i}
               className={`rounded-full transition-all duration-300 ${i === 0 ? 'w-6 h-2' : 'w-2 h-2 bg-gray-200'}`}
               style={i === 0 ? { background: 'linear-gradient(135deg, var(--color-primary, #1a237e), #0288D1)' } : {}} />
@@ -171,7 +182,7 @@ const filtered = activeFilter === 'All'
                 className="text-2xl font-bold mb-2"
                 style={{ color: 'var(--color-dark, #000000)', fontFamily: "'Playfair Display', serif" }}
               >
-                {selected.name}
+                {selected.title ?? selected.name}
               </h3>
               <p className="text-xs text-gray-400 mb-4 font-medium">📍 {selected.location}</p>
               <p className="text-gray-500 text-sm leading-relaxed mb-6">{selected.description}</p>

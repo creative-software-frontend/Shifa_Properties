@@ -7,6 +7,7 @@ import img3 from '../../assets/image/4.jfif';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { UI, pick } from '../../data/translations';
+import { useOurInvestorCategories } from '../../hooks/useOurInvestorCategories';
 
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 25 },
@@ -17,36 +18,62 @@ const staggerContainer: Variants = {
   visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
 };
 
-const SERVICES_DATA = [
-  {
-    id: 1,
-    icon: <Hotel size={38} />,
-    color: '#1a237e',
-    key: 'hotel' as const,
-    image: img1,
-    badgeText: '5 Night Stay'
-  },
-  {
-    id: 2,
-    icon: <Building2 size={38} />,
-    color: '#C9A84C',
-    key: 'apartment' as const,
-    image: img2,
-    badgeText: 'Modern Suite'
-  },
-  {
-    id: 3,
-    icon: <Map size={38} />,
-    color: '#1a237e',
-    key: 'land' as const,
-    image: img3,
-    badgeText: 'Prime Plot'
-  },
-];
-
 const ServicesSection: React.FC = () => {
   const { lang } = useLanguage();
   const s = UI.services;
+  const { categories } = useOurInvestorCategories();
+
+  // Visual fallback (icons/images/colors) cycled across dynamic backend cards.
+  const VISUALS = [
+    { icon: <Hotel size={38} />, color: '#1a237e', image: img1, badgeText: '5 Night Stay' },
+    { icon: <Building2 size={38} />, color: '#C9A84C', image: img2, badgeText: 'Modern Suite' },
+    { icon: <Map size={38} />, color: '#1a237e', image: img3, badgeText: 'Prime Plot' },
+  ];
+
+  // Use backend data when available; otherwise fall back to the static set.
+  const SERVICES_DATA = categories.length
+    ? categories.map((cat, i) => ({
+        id: cat.id,
+        icon: VISUALS[i % VISUALS.length].icon,
+        color: VISUALS[i % VISUALS.length].color,
+        image: VISUALS[i % VISUALS.length].image,
+        badgeText: VISUALS[i % VISUALS.length].badgeText,
+        title: cat.title,
+        desc: cat.position,
+        rating: cat.rating,
+      }))
+    : [
+        {
+          id: 1,
+          icon: <Hotel size={38} />,
+          color: '#1a237e',
+          image: img1,
+          badgeText: '5 Night Stay',
+          title: pick(s.serviceItems.hotel.title, lang),
+          desc: pick(s.serviceItems.hotel.desc, lang),
+          rating: '4.9',
+        },
+        {
+          id: 2,
+          icon: <Building2 size={38} />,
+          color: '#C9A84C',
+          image: img2,
+          badgeText: 'Modern Suite',
+          title: pick(s.serviceItems.apartment.title, lang),
+          desc: pick(s.serviceItems.apartment.desc, lang),
+          rating: '4.9',
+        },
+        {
+          id: 3,
+          icon: <Map size={38} />,
+          color: '#1a237e',
+          image: img3,
+          badgeText: 'Prime Plot',
+          title: pick(s.serviceItems.land.title, lang),
+          desc: pick(s.serviceItems.land.desc, lang),
+          rating: '4.9',
+        },
+      ];
 
   // Night-time logic: Activates filter between 6 PM and 6 AM
   const isNight = new Date().getHours() < 6 || new Date().getHours() >= 18;
@@ -82,8 +109,6 @@ const ServicesSection: React.FC = () => {
           viewport={{ once: true, margin: '-100px' }}
         >
           {SERVICES_DATA.map((service) => {
-            const item = s.serviceItems[service.key];
-
             return (
               <motion.div
                 key={service.id}
@@ -97,7 +122,7 @@ const ServicesSection: React.FC = () => {
                 <div className="absolute inset-0 z-0 overflow-hidden">
                   <motion.img
                     src={service.image}
-                    alt={pick(item.title, lang)}
+                    alt={service.title}
                     className={`w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${imageFilter}`}
                   />
                 </div>
@@ -117,14 +142,14 @@ const ServicesSection: React.FC = () => {
                 {/* Content Area with drop-shadows for better contrast against images */}
                 <div className="relative z-20 flex flex-col items-start w-full text-left drop-shadow-md">
                   <h3 className="text-white text-xl font-semibold mb-1.5 tracking-wide" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    {pick(item.title, lang)}
+                    {service.title}
                   </h3>
                   <p className="text-white/90 text-xs font-normal leading-relaxed mb-4 line-clamp-3">
-                    {pick(item.desc, lang)}
+                    {service.desc}
                   </p>
                   <div className="flex flex-wrap items-center gap-2 mb-5">
                     <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium text-white" style={{ background: 'rgba(0, 0, 0, 0.3)', backdropFilter: 'blur(4px)' }}>
-                      ★ 4.9
+                      ★ {service.rating}
                     </span>
                     <span className="px-3 py-1 rounded-full text-[11px] font-medium text-white" style={{ background: 'rgba(0, 0, 0, 0.3)', backdropFilter: 'blur(4px)' }}>
                       {service.badgeText}

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useLogos } from "../hooks/useLogos";
 import { useSocialLinks } from "../hooks/useSocialLinks";
+import { useFooterInfo } from "../hooks/useFooterInfo";
 import { useLanguage } from '../context/LanguageContext';
 import { UI, pick } from '../data/translations';
 
@@ -64,6 +65,7 @@ const Footer: React.FC = () => {
   const { lang } = useLanguage();
   const { footerLogo } = useLogos();
   const { socialLinks } = useSocialLinks();
+  const { footerInfo } = useFooterInfo();
 
   // Use backend links when available; otherwise fall back to the static set.
   const SOCIALS = socialLinks.length
@@ -78,38 +80,38 @@ const Footer: React.FC = () => {
     {
       icon: MapPin,
       title: pick(UI.footer.contactTitles.headquarters, lang),
-      value: 'Confidence Center, 2nd Building, 13th Floor, Flat-13/A, Shahjadpur, Gulshan, Dhaka.',
-      href: 'https://maps.google.com/?q=Confidence+Center+Shahjadpur+Gulshan+Dhaka'
+      value: footerInfo?.address || 'Confidence Center, 2nd Building, 13th Floor, Flat-13/A, Shahjadpur, Gulshan, Dhaka.',
+      href: footerInfo?.map_url || 'https://maps.google.com/?q=Confidence+Center+Shahjadpur+Gulshan+Dhaka'
     },
     {
       icon: Globe,
       title: lang === 'BN' ? 'ওয়েবসাইট' : 'Website',
-      value: 'www.shifaproperties.com',
-      href: 'https://www.shifaproperties.com'
+      value: footerInfo?.website_label || 'www.shifaproperties.com',
+      href: footerInfo?.website_url || 'https://www.shifaproperties.com'
     },
     {
       icon: Mail,
       title: pick(UI.footer.contactTitles.email, lang),
-      value: 'info@shifaproperties.com',
-      href: 'mailto:info@shifaproperties.com'
+      value: footerInfo?.email || 'info@shifaproperties.com',
+      href: footerInfo?.email ? `mailto:${footerInfo.email}` : 'mailto:info@shifaproperties.com'
     },
     {
       icon: Phone,
       title: pick(UI.footer.contactTitles.pabxHotline, lang),
-      value: '02226617229',
-      href: 'tel:02226617229'
+      value: footerInfo?.pabx_hotline || '02226617229',
+      href: footerInfo?.pabx_hotline ? `tel:${footerInfo.pabx_hotline}` : 'tel:02226617229'
     },
     {
       icon: BookmarkCheck,
       title: pick(UI.footer.contactTitles.salesDesk, lang),
-      value: '01805 019801, 01805 019802',
-      href: 'tel:+8801805019801',
+      value: footerInfo?.sales_hotline || '01805 019801, 01805 019802',
+      href: footerInfo?.sales_hotline ? `tel:${footerInfo.sales_hotline.split(',')[0]}` : 'tel:+8801805019801',
       highlight: true
     },
     {
       icon: Clock,
       title: pick(UI.footer.contactTitles.officeHours, lang),
-      value: pick(UI.footer.contactTitles.officeHoursValue, lang),
+      value: footerInfo?.office_hours || pick(UI.footer.contactTitles.officeHoursValue, lang),
     }
   ];
 
@@ -137,12 +139,12 @@ const Footer: React.FC = () => {
   return (
     <footer
       id="contact"
-      className="relative overflow-hidden text-slate-100 border-t border-slate-900 bg-[#060614]"
+      className="relative overflow-hidden text-slate-700 border-t border-slate-300 bg-slate-100"
     >
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-10">
 
         {/* TOP LAYER: Brand & Expanded Grid layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 pb-16 border-b border-slate-800/60">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 pb-16 border-b border-slate-200">
 
           {/* Brand Profile Block */}
           <div className="lg:col-span-4 space-y-6">
@@ -155,7 +157,7 @@ const Footer: React.FC = () => {
                 />
               </div>
               <div>
-                <h3 className="font-extrabold text-2xl text-white tracking-tight font-serif">
+                <h3 className="font-extrabold text-2xl text-slate-900 tracking-tight font-serif">
                   Shifa Properties <span className="text-[#C9A84C]">Ltd</span>
                 </h3>
                 <p className="text-[10px] tracking-[0.3em] uppercase font-bold text-[#C9A84C]/90 mt-0.5">
@@ -164,12 +166,12 @@ const Footer: React.FC = () => {
               </div>
             </Link>
 
-            <p className="text-slate-100 text-sm leading-relaxed max-w-md backdrop-blur-[2px] font-medium">
+            <p className="text-slate-600 text-sm leading-relaxed max-w-md font-medium">
               {pick(UI.footer.taglineBody, lang)}
             </p>
 
             <div className="space-y-3">
-              <p className="text-xs uppercase tracking-wider font-semibold text-slate-200">{pick(UI.footer.connectWith, lang)}</p>
+              <p className="text-xs uppercase tracking-wider font-semibold text-slate-600">{pick(UI.footer.connectWith, lang)}</p>
               <div className="flex flex-wrap gap-2.5">
                 {SOCIALS.map((s) => (
                   <a
@@ -178,7 +180,7 @@ const Footer: React.FC = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={s.label}
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center text-slate-200 hover:text-white transition-all duration-300 border border-slate-700 bg-slate-900/60 backdrop-blur-sm shadow-inner ${SOCIAL_PLATFORM_MAP[s.platform]?.color ?? 'hover:bg-[#C9A84C] hover:border-[#C9A84C]'}`}
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 hover:text-white transition-all duration-300 border border-slate-200 bg-white shadow-sm ${SOCIAL_PLATFORM_MAP[s.platform]?.color ?? 'hover:bg-[#C9A84C] hover:border-[#C9A84C]'}`}
                   >
                     {SOCIAL_PLATFORM_MAP[s.platform]?.icon ?? FacebookIcon}
                   </a>
@@ -188,7 +190,12 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Expanded Grid System Matrix */}
-          <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950/60 p-5 rounded-2xl border border-slate-800/40 backdrop-blur-md">
+          <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            {footerInfo?.office_name && (
+              <p className="sm:col-span-2 text-xs uppercase tracking-[0.2em] font-bold text-[#C9A84C] mb-1">
+                {footerInfo.office_name}
+              </p>
+            )}
             {CONTACT_INFO.map((item, idx) => {
               const IconComponent = item.icon;
               const isLink = !!item.href;
@@ -200,20 +207,20 @@ const Footer: React.FC = () => {
                   {...(isLink ? { href: item.href, target: item.href?.startsWith('http') ? '_blank' : undefined, rel: 'noopener noreferrer' } : {})}
                   className={`flex gap-4 p-3.5 rounded-xl transition-all duration-200 border ${item.highlight
                     ? 'bg-[#C9A84C]/10 border-[#C9A84C]/40 hover:bg-[#C9A84C]/20'
-                    : 'border-transparent hover:bg-slate-900/80 hover:border-slate-700/50'
+                    : 'border-transparent hover:bg-slate-50 hover:border-slate-200'
                     } ${isLink ? 'group/card cursor-pointer' : ''} ${item.title.includes('Office Hours') || item.title.includes('অফিসের সময়') ? 'sm:col-span-2' : ''}`}
                 >
                   <div className={`flex-shrink-0 w-10 h-10 rounded-xl border flex items-center justify-center transition-transform group-hover/card:scale-105 ${item.highlight
                     ? 'bg-gradient-to-br from-[#C9A84C]/30 to-[#C9A84C]/10 border-[#C9A84C]/50 text-[#C9A84C]'
-                    : 'bg-gradient-to-br from-slate-900 to-slate-950 border-slate-700 text-[#C9A84C]'
+                    : 'bg-gradient-to-br from-slate-100 to-slate-50 border-slate-200 text-[#C9A84C]'
                     }`}>
                     <IconComponent className="w-5 h-5" />
                   </div>
                   <div className="space-y-0.5">
-                    <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-200">{item.title}</h5>
+                    <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-600">{item.title}</h5>
                     <p className={`text-xs leading-normal font-semibold ${item.highlight
-                      ? 'text-white font-bold flex items-center gap-1'
-                      : isLink ? 'text-slate-100 group-hover/card:text-white transition-colors flex items-center gap-1' : 'text-slate-200'
+                      ? 'text-slate-900 font-bold flex items-center gap-1'
+                      : isLink ? 'text-slate-700 group-hover/card:text-slate-900 transition-colors flex items-center gap-1' : 'text-slate-600'
                       }`}>
                       {item.value}
                       {isLink && <ArrowUpRight className="w-3 h-3 opacity-0 group-hover/card:opacity-100 transition-all text-[#C9A84C]" />}
@@ -227,11 +234,11 @@ const Footer: React.FC = () => {
         </div>
 
         {/* MIDDLE LAYER */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 py-12 border-b border-slate-800/40">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 py-12 border-b border-slate-200">
           {QUICK_LINKS.map((col) => (
             <div key={col.title} className="space-y-4">
               <div>
-                <h4 className="text-white font-bold text-xs tracking-widest uppercase">{col.title}</h4>
+                <h4 className="text-slate-900 font-bold text-xs tracking-widest uppercase">{col.title}</h4>
                 <div className="w-6 h-[2px] mt-2 rounded-full bg-[#C9A84C]" />
               </div>
               <ul className="space-y-2.5">
@@ -239,7 +246,7 @@ const Footer: React.FC = () => {
                   <li key={link.label}>
                     <Link
                       to={link.href}
-                      className="text-slate-200 text-sm hover:text-white transition-colors duration-200 flex items-center gap-2 group/item font-medium"
+                      className="text-slate-600 text-sm hover:text-slate-900 transition-colors duration-200 flex items-center gap-2 group/item font-medium"
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-[#C9A84C] opacity-0 -ml-2 group-hover/item:opacity-100 group-hover/item:ml-0 transition-all duration-200" />
                       {link.label}
@@ -252,17 +259,19 @@ const Footer: React.FC = () => {
 
           {/* Compliance Card */}
           <div className="sm:col-span-2 space-y-4">
-            <h4 className="text-white font-bold text-xs tracking-widest uppercase">{pick(UI.footer.corporateStatus, lang)}</h4>
+            <h4 className="text-slate-900 font-bold text-xs tracking-widest uppercase">{pick(UI.footer.corporateStatus, lang)}</h4>
             <div className="w-6 h-[2px] mt-2 rounded-full bg-[#C9A84C]" />
-            <div className="p-4 rounded-xl bg-gradient-to-br from-slate-950/80 to-slate-900/80 border border-slate-800/80 space-y-2 backdrop-blur-sm">
+            <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2 shadow-sm">
               <div className="flex items-start gap-3">
                 <Building2 className="w-5 h-5 text-[#C9A84C] flex-shrink-0 mt-0.5" />
                 <div className="space-y-1.5">
-                  <p className="text-xs text-slate-100 leading-normal font-medium">
-                    {pick(UI.footer.complianceText, lang)}
+                  <p className="text-xs text-slate-600 leading-normal font-medium">
+                    {footerInfo?.corporate_status || pick(UI.footer.complianceText, lang)}
                   </p>
-                  <p className="text-[10px] font-mono text-slate-300 tracking-wider font-semibold">
-                    REG REGISTRATION NO: C-XXXXXX / RJSC BANGALORE TRADING ID: XXXXX
+                  <p className="text-[10px] font-mono text-slate-500 tracking-wider font-semibold">
+                    {footerInfo
+                      ? `REG REGISTRATION NO: ${footerInfo.reg_no} / RJSC TRADING ID: ${footerInfo.trading_id}`
+                      : 'REG REGISTRATION NO: C-XXXXXX / RJSC TRADING ID: XXXXX'}
                   </p>
                 </div>
               </div>
@@ -271,31 +280,31 @@ const Footer: React.FC = () => {
         </div>
 
         {/* BOTTOM COMPLIANCE LAYER */}
-        <div className="pt-8 flex flex-col lg:flex-row items-center justify-between gap-6 w-full border-t border-slate-800/60">
+        <div className="pt-8 flex flex-col lg:flex-row items-center justify-between gap-6 w-full border-t border-slate-200">
           <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left w-auto">
-            <p className="text-slate-300 text-xs lg:whitespace-nowrap font-medium">
+            <p className="text-slate-600 text-xs lg:whitespace-nowrap font-medium">
               © {currentYear} Shifa Properties Ltd Group. {pick(UI.footer.copyrightFull, lang)}
             </p>
 
-            <span className="hidden md:inline text-slate-700">|</span>
+            <span className="hidden md:inline text-slate-400">|</span>
 
             <div className="flex items-center justify-center gap-4 flex-shrink-0">
-              <Link to="/privacy" className="text-slate-300 hover:text-white text-xs transition-colors flex items-center gap-1 whitespace-nowrap font-medium">
+              <Link to="/privacy" className="text-slate-600 hover:text-slate-900 text-xs transition-colors flex items-center gap-1 whitespace-nowrap font-medium">
                 <ShieldAlert className="w-3 h-3 text-[#C9A84C]" /> {pick(UI.footer.privacyPolicy, lang)}
               </Link>
-              <span className="text-slate-700">|</span>
-              <Link to="/terms" className="text-slate-300 hover:text-white text-xs transition-colors flex items-center gap-1 whitespace-nowrap font-medium">
+              <span className="text-slate-400">|</span>
+              <Link to="/terms" className="text-slate-600 hover:text-slate-900 text-xs transition-colors flex items-center gap-1 whitespace-nowrap font-medium">
                 <FileText className="w-3 h-3 text-[#C9A84C]" /> {pick(UI.footer.termsOfService, lang)}
               </Link>
             </div>
           </div>
 
           {/* Software Integrator Seal */}
-          <div className="flex items-center gap-2.5 py-2 px-4 bg-slate-950/80 border border-slate-800 rounded-full shadow-inner flex-shrink-0 backdrop-blur-sm">
-            <span className="text-slate-200 text-[11px] font-semibold tracking-wide whitespace-nowrap">{pick(UI.footer.techPartner, lang)}</span>
-            <span className="w-1 h-1 rounded-full bg-slate-700" />
+          <div className="flex items-center gap-2.5 py-2 px-4 bg-white border border-slate-200 rounded-full shadow-sm flex-shrink-0">
+            <span className="text-slate-600 text-[11px] font-semibold tracking-wide whitespace-nowrap">{pick(UI.footer.techPartner, lang)}</span>
+            <span className="w-1 h-1 rounded-full bg-slate-300" />
             <a
-              href="https://osit.com.bd"
+              href="https://ositsltd.com"
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs font-black tracking-wide bg-gradient-to-r from-[#C9A84C] to-[#fde68a] bg-clip-text text-transparent hover:brightness-110 transition-all whitespace-nowrap"

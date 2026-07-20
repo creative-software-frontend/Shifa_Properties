@@ -29,9 +29,10 @@ const AboutSection: React.FC = () => {
   const { sisterConcerns } = useSisterConcerns();
 
   // Use backend data when available; otherwise fall back to the static set.
+  // Both branches normalize to plain strings so the cards render consistently.
   const concerns = sisterConcerns.length
     ? sisterConcerns.map((c) => ({ name: c.title, sub: c.description }))
-    : a.sisterConcerns;
+    : a.sisterConcerns.map((c) => ({ name: pick(c.name, lang), sub: pick(c.sub, lang) }));
 
   return (
     /* Changed overflow-hidden to visible to let the metric card float freely outside the block boundaries */
