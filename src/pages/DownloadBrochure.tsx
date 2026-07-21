@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import brochurePdf from '../assets/image/brochure.pdf';
 import logoImg from '../assets/image/logo.jpeg';
 import { useLanguage } from '../context/LanguageContext';
+import { useFloatingStats } from '../hooks/useFloatingStats';
 
 const content = {
   EN: {
@@ -52,6 +53,13 @@ const DownloadBrochure: React.FC = () => {
   const { lang } = useLanguage();
   const c = content[lang];
   const [downloaded, setDownloaded] = useState(false);
+  const { stats, loading } = useFloatingStats();
+
+  const dynamicStats = [
+    { label: c.stats[0].label, value: stats ? stats.years : '-' },
+    { label: c.stats[1].label, value: stats ? stats.investors : '-' },
+    { label: c.stats[2].label, value: stats ? stats.project : '-' },
+  ];
 
   // Auto-trigger download on mount
   useEffect(() => {
@@ -126,9 +134,15 @@ const DownloadBrochure: React.FC = () => {
 
               {/* Stats row */}
               <div className="grid grid-cols-3 gap-4 mb-8 py-5 rounded-2xl" style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)' }}>
-                {c.stats.map((s) => (
+                {dynamicStats.map((s) => (
                   <div key={s.label} className="text-center">
-                    <div className="text-2xl font-black" style={{ color: '#C9A84C' }}>{s.value}</div>
+                    <div className="text-2xl font-black flex justify-center" style={{ color: '#C9A84C' }}>
+                      {loading ? (
+                        <div className="h-8 w-16 bg-white/20 rounded animate-pulse"></div>
+                      ) : (
+                        s.value
+                      )}
+                    </div>
                     <div className="text-white/60 text-xs mt-0.5">{s.label}</div>
                   </div>
                 ))}

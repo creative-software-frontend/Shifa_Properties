@@ -5,6 +5,7 @@ import { Counter } from '../ui/Counter';
 import { useLanguage } from '../../context/LanguageContext';
 import { UI, pick } from '../../data/translations';
 import { useSisterConcerns } from '../../hooks/useSisterConcerns';
+import { useFloatingStats } from '../../hooks/useFloatingStats';
 
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 25 },
@@ -27,6 +28,7 @@ const AboutSection: React.FC = () => {
   const { lang } = useLanguage();
   const a = UI.about;
   const { sisterConcerns } = useSisterConcerns();
+  const { stats, loading: statsLoading } = useFloatingStats();
 
   // Use backend data when available; otherwise fall back to the static set.
   // Both branches normalize to plain strings so the cards render consistently.
@@ -148,18 +150,52 @@ const AboutSection: React.FC = () => {
 
                 {/* Counter Metric Section */}
                 <div className="mt-4 pt-3 border-t border-gray-100 flex gap-6 justify-between">
-                  <div className="text-left">
-                    <div className="font-bold text-base text-neutral-900"><Counter value="10+" /></div>
-                    <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wider mt-0.5">{pick(a.years, lang)}</p>
-                  </div>
-                  <div className="text-left">
-                    <div className="font-bold text-base text-neutral-900"><Counter value="5000+" /></div>
-                    <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wider mt-0.5">{pick(a.investors, lang)}</p>
-                  </div>
-                  <div className="text-left">
-                    <div className="font-bold text-base text-neutral-900"><Counter value="15+" /></div>
-                    <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wider mt-0.5">{pick(a.projects, lang)}</p>
-                  </div>
+                  {statsLoading ? (
+                    <>
+                      <div className="text-left animate-pulse">
+                        <div className="h-6 w-12 bg-gray-200 rounded mb-1"></div>
+                        <div className="h-3 w-16 bg-gray-200 rounded mt-1.5"></div>
+                      </div>
+                      <div className="text-left animate-pulse">
+                        <div className="h-6 w-12 bg-gray-200 rounded mb-1"></div>
+                        <div className="h-3 w-16 bg-gray-200 rounded mt-1.5"></div>
+                      </div>
+                      <div className="text-left animate-pulse">
+                        <div className="h-6 w-12 bg-gray-200 rounded mb-1"></div>
+                        <div className="h-3 w-16 bg-gray-200 rounded mt-1.5"></div>
+                      </div>
+                    </>
+                  ) : stats ? (
+                    <>
+                      <div className="text-left">
+                        <div className="font-bold text-base text-neutral-900"><Counter value={stats.years} /></div>
+                        <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wider mt-0.5">{pick(a.years, lang)}</p>
+                      </div>
+                      <div className="text-left">
+                        <div className="font-bold text-base text-neutral-900"><Counter value={stats.investors} /></div>
+                        <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wider mt-0.5">{pick(a.investors, lang)}</p>
+                      </div>
+                      <div className="text-left">
+                        <div className="font-bold text-base text-neutral-900"><Counter value={stats.project} /></div>
+                        <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wider mt-0.5">{pick(a.projects, lang)}</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-left">
+                        <div className="font-bold text-base text-neutral-900">-</div>
+                        <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wider mt-0.5">{pick(a.years, lang)}</p>
+                      </div>
+                      <div className="text-left">
+                        <div className="font-bold text-base text-neutral-900">-</div>
+                        <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wider mt-0.5">{pick(a.investors, lang)}</p>
+                      </div>
+                      <div className="text-left">
+                        <div className="font-bold text-base text-neutral-900">-</div>
+                        <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wider mt-0.5">{pick(a.projects, lang)}</p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </motion.div>
             </motion.div>

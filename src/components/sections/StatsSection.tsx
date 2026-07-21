@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import { Trophy, Users, Building, Globe } from 'lucide-react';
+import { Trophy, Users, Building } from 'lucide-react';
 import { Counter } from '../ui/Counter';
-import { STATS } from '../../data/landingData';
 import { useLanguage } from '../../context/LanguageContext';
 import { UI } from '../../data/translations';
+import { useFloatingStats } from '../../hooks/useFloatingStats';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -16,6 +16,13 @@ const itemVariants = {
 
 export const StatsSection = () => {
   const { lang } = useLanguage();
+  const { stats, loading } = useFloatingStats();
+
+  const dynamicStats = [
+    { id: 1, value: stats ? stats.years : '-', icon: <Trophy size={40} /> },
+    { id: 2, value: stats ? stats.investors : '-', icon: <Users size={40} /> },
+    { id: 3, value: stats ? stats.project : '-', icon: <Building size={40} /> }
+  ];
 
   return (
     /* Changed gradient endpoints to modern premium corporate blue theme configurations */
@@ -28,30 +35,33 @@ export const StatsSection = () => {
 
       <div className="gs-container max-w-7xl mx-auto px-4 relative z-10 overflow-visible">
         <motion.div
-          className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12"
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12"
           variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }}
         >
-          {STATS.map((stat, idx) => {
-            const icons = [<Trophy size={40} />, <Users size={40} />, <Building size={40} />, <Globe size={40} />];
-            return (
-              <motion.div key={stat.id} variants={itemVariants} className="text-center select-none">
-                {/* Icons glowing accent color */}
-                <div className="flex justify-center mb-4 text-amber-400 drop-shadow-[0_2px_8px_rgba(251,191,36,0.2)]">
-                  {icons[idx]}
-                </div>
+          {dynamicStats.map((stat, idx) => (
+            <motion.div key={stat.id} variants={itemVariants} className="text-center select-none">
+              {/* Icons glowing accent color */}
+              <div className="flex justify-center mb-4 text-amber-400 drop-shadow-[0_2px_8px_rgba(251,191,36,0.2)]">
+                {stat.icon}
+              </div>
 
-                {/* Large high-contrast metric values */}
-                <div className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-200 tracking-tight">
+              {/* Large high-contrast metric values */}
+              <div className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-200 tracking-tight flex justify-center">
+                {loading ? (
+                  <div className="h-10 w-20 bg-white/20 rounded animate-pulse"></div>
+                ) : stat.value === '-' ? (
+                  '-'
+                ) : (
                   <Counter value={stat.value} />
-                </div>
+                )}
+              </div>
 
-                {/* Refined subtle description labels */}
-                <p className="text-blue-100/80 mt-2.5 font-semibold tracking-wider text-xs uppercase">
-                  {lang === 'EN' ? UI.stats[idx]?.en : UI.stats[idx]?.bn}
-                </p>
-              </motion.div>
-            );
-          })}
+              {/* Refined subtle description labels */}
+              <p className="text-blue-100/80 mt-2.5 font-semibold tracking-wider text-xs uppercase">
+                {lang === 'EN' ? UI.stats[idx]?.en : UI.stats[idx]?.bn}
+              </p>
+            </motion.div>
+          ))}
         </motion.div>
       </div>
     </section>
