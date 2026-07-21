@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { img4, img5, img6 } from '../data/landingData';
 import PageHero from '../components/PageHero';
 import PageTransition from '../components/PageTransition';
+import { useWhyUs } from '../hooks/useWhyUs';
 
 // Integrated Lucide React Icons instead of React Icons
 import { CheckCircle, TrendingUp, Layers, Target } from 'lucide-react';
@@ -29,6 +30,8 @@ const staggerContainer: Variants = {
 const WhyUsPage: React.FC = () => {
   const { lang } = useLanguage();
   const t = UI.whyUs;
+  const { whyUsItems } = useWhyUs();
+  const whyUsData = whyUsItems[0];
 
   return (
     <PageTransition id="why-us-page">
@@ -36,9 +39,9 @@ const WhyUsPage: React.FC = () => {
 
         {/* SECTION 1: HERO BANNER */}
         <PageHero
-          title={pick(t.heroTitle, lang)}
-          subtitle="Discover why we are the best choice for your investment"
-          imageSrc={img4}
+          title={whyUsData ? whyUsData.title : pick(t.heroTitle, lang)}
+          subtitle={whyUsData ? whyUsData.description : "Discover why we are the best choice for your investment"}
+          imageSrc={whyUsData ? whyUsData.image : img4}
         />
 
         {/* SECTION 2: EMPOWER SOLUTIONS */}
