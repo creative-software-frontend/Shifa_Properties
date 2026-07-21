@@ -65,7 +65,7 @@ const prev = () => {
     intervalRef.current = setInterval(next, 6000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current]);
+  }, [current, banners.length]);
 
   const slide = UI.heroSlides[current] || UI.heroSlides[0];
 
@@ -135,7 +135,7 @@ const prev = () => {
                 textShadow: '0px 4px 24px rgba(0, 0, 0, 0.65), 0px 2px 6px rgba(0, 0, 0, 0.45)',
               }}
             >
-              {pick(slide.title, lang)}
+              {slideData.title || pick(slide.title, lang)}
             </motion.h1>
 
             {/* Gold accent divider */}

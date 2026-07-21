@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
-
 export interface Banner {
   id: number;
   title: string;
@@ -13,7 +12,6 @@ export interface Banner {
   ctaLink?: string;
   cta?: Record<string, string>;
 }
-
 
 export const useBanners = () => {
   const [banners, setBanners] = useState<Banner[]>([]);
