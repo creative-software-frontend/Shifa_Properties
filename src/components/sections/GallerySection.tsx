@@ -1,28 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import img0 from '../../assets/image/0.jfif';
-import img1 from '../../assets/image/1.jfif';
-import img2 from '../../assets/image/2.jfif';
-import img3 from '../../assets/image/3.jfif';
-import img4 from '../../assets/image/4.jfif';
-import img5 from '../../assets/image/5.jfif';
-import img6 from '../../assets/image/6.jfif';
-import img7 from '../../assets/image/7.jfif';
-import img8 from '../../assets/image/8.jfif';
-import img9 from '../../assets/image/9.jfif';
-
-const GALLERY = [
-  { src: img8, title: 'Padma Grand — Aerial Night View', tag: 'Hotel' },
-  { src: img9, title: 'Bay Sands — Sunset Elevation', tag: 'Hotel' },
-  { src: img5, title: 'Padma Grand — Golden Hour Facade', tag: 'Hotel' },
-  { src: img6, title: 'Bay Sands — Dusk Exterior', tag: 'Hotel' },
-  { src: img4, title: 'Kuakata Hotel — Bird\'s Eye', tag: 'Hotel' },
-  { src: img1, title: 'Infinity Pool Deck', tag: 'Amenity' },
-  { src: img2, title: 'Luxury Suite Interior', tag: 'Suite' },
-  { src: img3, title: 'Padma Bridge Hotel — Overview', tag: 'Hotel' },
-  { src: img7, title: 'Street-Level Facade', tag: 'Hotel' },
-  { src: img0, title: 'Penthouse Living Room', tag: 'Suite' },
-];
+import { useGallery } from '../../hooks/useGallery';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -36,10 +15,18 @@ const staggerContainer: Variants = {
 
 const GallerySection: React.FC = () => {
   const [lightbox, setLightbox] = useState<number | null>(null);
+  const { gallery: apiGallery, loading } = useGallery();
+
+  const galleryItems = apiGallery.map(item => ({
+    id: item.id,
+    src: getImageUrl(item.file_path),
+    title: item.title,
+    tag: item.description || 'Gallery'
+  }));
 
   const close = () => setLightbox(null);
-  const prev = () => setLightbox((p) => p !== null ? (p - 1 + GALLERY.length) % GALLERY.length : 0);
-  const next = () => setLightbox((p) => p !== null ? (p + 1) % GALLERY.length : 0);
+  const prev = () => setLightbox((p) => p !== null ? (p - 1 + galleryItems.length) % galleryItems.length : 0);
+  const next = () => setLightbox((p) => p !== null ? (p + 1) % galleryItems.length : 0);
 
   // Keyboard navigation for better UX
   useEffect(() => {
@@ -61,7 +48,7 @@ const GallerySection: React.FC = () => {
 
         {/* Heading */}
         <motion.div
-          className="text-center mb-6"
+          className="text-center mb-10"
           variants={fadeInUp}
           initial="hidden"
           whileInView="visible"
@@ -70,43 +57,33 @@ const GallerySection: React.FC = () => {
           <span className="section-label">Visual Showcase</span>
           <h2 className="section-title">Project Image Gallery</h2>
           <p className="section-subtitle mx-auto mt-3">
-            Explore our stunning collection of architectural renders and real imagery from our premium hotel and Hotel developments.
+            Explore our stunning collection of architectural renders and real imagery from our premium hotel developments.
           </p>
         </motion.div>
 
+        {/* Uniform gallery grid */}
         <motion.div
-          className="text-center mb-0"
-          variants={fadeInUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-        >
-          <span className="text-[#C9A84C] font-bold tracking-[0.2em] uppercase text-xs">Visual Showcase</span>
-          <h2 className="text-3xl md:text-4xl font-serif text-white mt-2">Project Image Gallery</h2>
-        </motion.div>
-
-        {/* Masonry-style gallery grid with adjusted gaps */}
-        <motion.div
-          className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6" // Increased gap from 4 to 6
+          key={galleryItems.length ? 'loaded' : 'loading'}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           variants={staggerContainer}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
         >
-          {GALLERY.map((item, idx) => (
+          {loading ? (
+             <div className="text-center py-8 text-gray-500 col-span-full">Loading gallery...</div>
+          ) : (
+             galleryItems.map((item, idx) => (
             <motion.div
-              key={idx}
+              key={item.id || idx}
               variants={fadeInUp}
-              className="group relative break-inside-avoid mb-6 rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500" // Increased mb from 4 to 6
+              className="group relative rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 aspect-[4/3]"
               onClick={() => setLightbox(idx)}
             >
-              <motion.img
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.6 }}
+              <img
                 src={item.src}
                 alt={item.title}
-                className="w-full h-auto object-cover"
-                loading="lazy"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
 
               {/* Hover overlay */}
@@ -118,13 +95,13 @@ const GallerySection: React.FC = () => {
                 <p className="text-white text-sm font-semibold">{item.title}</p>
               </div>
             </motion.div>
-          ))}
+          )))}
         </motion.div>
       </div>
 
       {/* Lightbox Wrapper */}
       <AnimatePresence>
-        {lightbox !== null && (
+        {lightbox !== null && galleryItems.length > 0 && (
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center p-4 cursor-zoom-out"
             style={{ background: 'rgba(13,13,26,0.92)', backdropFilter: 'blur(12px)' }}
@@ -143,8 +120,8 @@ const GallerySection: React.FC = () => {
             >
               {/* Image */}
               <img
-                src={GALLERY[lightbox].src}
-                alt={GALLERY[lightbox].title}
+                src={galleryItems[lightbox]?.src}
+                alt={galleryItems[lightbox]?.title}
                 className="w-full max-h-[80vh] object-contain rounded-2xl shadow-card-lg"
               />
 
@@ -153,11 +130,11 @@ const GallerySection: React.FC = () => {
                 <div>
                   <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mr-3 tracking-wider uppercase"
                     style={{ background: 'linear-gradient(135deg,#C9A84C,#fde68a)', color: '#0D0D1A' }}>
-                    {GALLERY[lightbox].tag}
+                    {galleryItems[lightbox]?.tag}
                   </span>
-                  <span className="text-white font-semibold">{GALLERY[lightbox].title}</span>
+                  <span className="text-white font-semibold">{galleryItems[lightbox]?.title}</span>
                 </div>
-                <span className="text-white/50 text-sm">{lightbox + 1} / {GALLERY.length}</span>
+                <span className="text-white/50 text-sm">{lightbox + 1} / {galleryItems.length}</span>
               </div>
 
               {/* Close Button */}
