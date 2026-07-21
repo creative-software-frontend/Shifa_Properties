@@ -34,32 +34,69 @@ export interface OurInvestmentListResponse {
   data: OurInvestmentItem[];
 }
 
+// Module-level cache — survives remounts and StrictMode double-invoke.
+// Stores the in-flight promise so concurrent calls share one request,
+// then stores the resolved data so subsequent mounts skip the network entirely.
+let _cache: OurInvestmentItem[] | null = null;
+let _inFlight: Promise<OurInvestmentItem[]> | null = null;
+
+const fetchOnce = (): Promise<OurInvestmentItem[]> => {
+  if (_cache) return Promise.resolve(_cache);
+  if (_inFlight) return _inFlight;
+
+  _inFlight = api
+    .get<OurInvestmentListResponse>('/v1/our-investment-list')
+    .then((response) => {
+      if (response.data && response.data.success) {
+        const sorted = (response.data.data || []).sort(
+          (a, b) => Number(a.position) - Number(b.position)
+        );
+        _cache = sorted;
+        _inFlight = null;
+        return sorted;
+      }
+      _inFlight = null;
+      throw new Error('Failed to fetch investment list');
+    })
+    .catch((err) => {
+      _inFlight = null;
+      throw err;
+    });
+
+  return _inFlight;
+};
+
 export const useOurInvestmentList = () => {
-  const [investments, setInvestments] = useState<OurInvestmentItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [investments, setInvestments] = useState<OurInvestmentItem[]>(_cache ?? []);
+  const [loading, setLoading] = useState<boolean>(!_cache);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchInvestments = async () => {
-      try {
-        const response = await api.get<OurInvestmentListResponse>('/v1/our-investment-list');
-        if (response.data && response.data.success) {
-          // Sort ascending by position
-          const sorted = (response.data.data || []).sort((a, b) => {
-            return Number(a.position) - Number(b.position);
-          });
-          setInvestments(sorted);
-        } else {
-          setError('Failed to fetch investment list');
-        }
-      } catch (err: any) {
-        setError(err.message || 'Error fetching investments');
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (_cache) {
+      // Data already in cache — nothing to fetch.
+      setInvestments(_cache);
+      setLoading(false);
+      return;
+    }
 
-    fetchInvestments();
+    let cancelled = false;
+    fetchOnce()
+      .then((data) => {
+        if (!cancelled) {
+          setInvestments(data);
+          setLoading(false);
+        }
+      })
+      .catch((err: any) => {
+        if (!cancelled) {
+          setError(err.message || 'Error fetching investments');
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return { investments, loading, error };

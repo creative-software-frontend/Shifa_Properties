@@ -37,22 +37,22 @@ const filtered = activeFilter === 'All'
     <section id="projects" className="gs-section bg-white py-20">
       <div className="gs-container max-w-7xl mx-auto px-4">
 
-        {/* ── HEADER AREA (Removed divider and switched to elegant dark theme text) ── */}
-        <div className="text-center mb-12">
+        {/* ── HEADER AREA ── */}
+        <div className="text-center mb-12 animate-fade-up">
           <span
-            className="text-xs font-bold tracking-[0.2em] uppercase block mb-1"
+            className="text-xs font-bold tracking-[0.2em] uppercase block mb-2"
             style={{ color: 'var(--color-primary, #C9A84C)' }}
           >
-            Our Portfolio
+            ur Portfolio
           </span>
           <h2
-            className="text-3xl md:text-4xl font-bold tracking-tight mb-4"
+            className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4"
             style={{ fontFamily: "'Playfair Display', serif", color: 'var(--color-dark, #000000)' }}
           >
             Our Project Overview
           </h2>
           <p className="text-gray-500 text-sm max-w-2xl mx-auto leading-relaxed">
-            Explore our portfolio of world-class hospitality and real estate projects across Bangladesh's most sought-after destinations.
+            Explore our portfolio of world-class hospitality and real estate projects across Bangladesh.
           </p>
         </div>
 
@@ -87,8 +87,8 @@ const filtered = activeFilter === 'All'
             <div
               key={project.id}
               id={`project-card-${project.id}`}
-              className="bg-white rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 group select-none animate-fade-up"
-              style={{ animationDelay: `${idx * 0.1}s`, boxShadow: 'var(--shadow-card)' }}
+              className="bg-white rounded-3xl overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-3 group select-none animate-fade-up border border-gray-100/50 hover:shadow-2xl relative"
+              style={{ animationDelay: `${idx * 0.15}s`, boxShadow: '0 10px 40px -10px rgba(0,0,0,0.08)' }}
               onClick={() => setSelected(project)}
             >
               {/* Image & Tags display */}
@@ -110,37 +110,42 @@ const filtered = activeFilter === 'All'
                 </div>
 
                 {/* Hover overlay micro-interaction */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300
-                                flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
-                  <span className="text-white font-semibold text-xs bg-white/20 backdrop-blur-md px-5 py-2.5 rounded-full uppercase tracking-wider">
-                    Learn More →
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500
+                                flex items-center justify-center bg-gradient-to-t from-black/80 via-black/30 to-transparent">
+                  <span className="text-white font-semibold text-xs bg-white/20 backdrop-blur-md px-6 py-3 rounded-full uppercase tracking-widest translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                    Explore Project
                   </span>
                 </div>
               </div>
 
-              {/* Information Content Block (Updated to crisp Black text typography) */}
-              <div className="p-6">
-                <div className="flex items-start justify-between gap-4 mb-2">
+              {/* Information Content Block */}
+              <div className="p-7 relative bg-white z-10 transition-transform duration-500">
+                <div className="absolute -top-6 right-6 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center transform group-hover:rotate-45 transition-transform duration-500 border border-gray-50">
+                  <span className="text-amber-500 text-xl">↗</span>
+                </div>
+                
+                <div className="flex items-start justify-between gap-4 mb-3">
                   <h3
-                    className="font-bold text-lg transition-colors duration-200 group-hover:text-amber-600"
-                    style={{ color: 'var(--color-dark, #000000)', fontFamily: "'Playfair Display', serif" }}
+                    className="font-bold text-xl transition-colors duration-300 group-hover:text-amber-600"
+                    style={{ color: 'var(--color-dark, #111)', fontFamily: "'Playfair Display', serif" }}
                   >
                     {project.title ?? project.name}
                   </h3>
                 </div>
-                <div className="flex items-center gap-1 text-[11px] text-gray-400 mb-3 font-medium">
-                  <span>📍</span>
+                <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-4 font-medium">
+                  <span className="text-amber-500">📍</span>
                   <span>{project.location}</span>
                 </div>
-                <p className="text-gray-500 text-xs md:text-sm leading-relaxed line-clamp-2 mb-4">{project.description}</p>
+                <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 mb-6 group-hover:text-gray-600 transition-colors duration-300">{project.description}</p>
 
-                <div className="mt-4 pt-4 border-t border-gray-50 flex items-center gap-4">
-                  <button className="text-xs font-bold tracking-wider uppercase text-[#C9A84C] group-hover:translate-x-1 transition-transform duration-300">
-                    View Details →
+                <div className="pt-5 border-t border-gray-100 flex items-center justify-between">
+                  <button className="text-xs font-bold tracking-widest uppercase text-[#C9A84C] group-hover:pl-2 transition-all duration-300 flex items-center gap-2">
+                    View Details <span className="text-lg leading-none">→</span>
                   </button>
-                  <span className="text-xs text-gray-200">|</span>
-                  <button className="text-xs font-medium text-gray-400 hover:text-black transition-colors">📍 Location</button>
-                  <button className="text-xs font-medium text-gray-400 hover:text-black transition-colors">🎥 Video</button>
+                  <div className="flex gap-3">
+                    <button className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-amber-50 hover:text-amber-600 transition-all duration-300" title="Location">📍</button>
+                    <button className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-amber-50 hover:text-amber-600 transition-all duration-300" title="Video">🎥</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -149,10 +154,10 @@ const filtered = activeFilter === 'All'
         )}
 
         {/* ── DOT NAVIGATION DISPLAY ── */}
-        <div className="flex justify-center gap-2 mt-12">
+        <div className="flex justify-center items-center gap-2.5 mt-14">
           {filtered.map((_, i) => (
             <span key={i}
-              className={`rounded-full transition-all duration-300 ${i === 0 ? 'w-6 h-2' : 'w-2 h-2 bg-gray-200'}`}
+              className={`rounded-full transition-all duration-500 ease-out cursor-pointer ${i === 0 ? 'w-10 h-2.5 shadow-md' : 'w-2.5 h-2.5 bg-gray-200 hover:bg-gray-300 hover:scale-125'}`}
               style={i === 0 ? { background: 'linear-gradient(135deg, var(--color-primary, #1a237e), #0288D1)' } : {}} />
           ))}
         </div>
