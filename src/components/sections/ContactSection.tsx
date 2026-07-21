@@ -7,6 +7,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { UI, pick } from '../../data/translations';
 import api from '../../utils/api';
 import { useInvestmentCategories } from '../../hooks/useInvestmentCategories';
+import { useContactManages } from '../../hooks/useContactManages';
 
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -18,6 +19,7 @@ const ContactSection: React.FC = () => {
   const c = UI.contact;
 
   const { categories, loading: categoriesLoading } = useInvestmentCategories();
+  const { contactData, loading: contactLoading } = useContactManages();
 
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', investment_category_id: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
@@ -122,10 +124,14 @@ const ContactSection: React.FC = () => {
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-sm text-black truncate">{pick(c.callUs, lang)}</p>
-                    <p className="text-gray-500 text-xs mt-0.5">01877715333</p>
+                    {contactLoading ? (
+                      <div className="h-4 bg-gray-200 rounded animate-pulse mt-0.5 w-24"></div>
+                    ) : (
+                      <p className="text-gray-500 text-xs mt-0.5">{contactData?.call_use || '01877715333'}</p>
+                    )}
                   </div>
                 </div>
-                <a href="tel:01877715333" className="text-white text-xs font-bold px-5 py-2.5 rounded-xl flex-shrink-0 text-center shadow-sm bg-black hover:bg-neutral-800 transition-colors">
+                <a href={`tel:${contactData?.call_use || '01877715333'}`} className="text-white text-xs font-bold px-5 py-2.5 rounded-xl flex-shrink-0 text-center shadow-sm bg-black hover:bg-neutral-800 transition-colors">
                   {pick(c.callBtn, lang)}
                 </a>
               </div>
@@ -138,10 +144,14 @@ const ContactSection: React.FC = () => {
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-sm text-black truncate">{pick(c.email, lang)}</p>
-                    <p className="text-gray-500 text-xs mt-0.5 truncate max-w-[180px] sm:max-w-xs">info@shifapropertiesltdgroup.com</p>
+                    {contactLoading ? (
+                      <div className="h-4 bg-gray-200 rounded animate-pulse mt-0.5 w-40"></div>
+                    ) : (
+                      <p className="text-gray-500 text-xs mt-0.5 truncate max-w-[180px] sm:max-w-xs">{contactData?.email || 'info@shifapropertiesltdgroup.com'}</p>
+                    )}
                   </div>
                 </div>
-                <a href="mailto:info@shifapropertiesltdgroup.com" className="text-white text-xs font-bold px-5 py-2.5 rounded-xl flex-shrink-0 text-center shadow-sm bg-black hover:bg-neutral-800 transition-colors">
+                <a href={`mailto:${contactData?.email || 'info@shifapropertiesltdgroup.com'}`} className="text-white text-xs font-bold px-5 py-2.5 rounded-xl flex-shrink-0 text-center shadow-sm bg-black hover:bg-neutral-800 transition-colors">
                   {pick(c.emailBtn, lang)}
                 </a>
               </div>
@@ -154,10 +164,14 @@ const ContactSection: React.FC = () => {
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-sm text-black truncate">{pick(c.whatsapp, lang)}</p>
-                    <p className="text-gray-500 text-xs mt-0.5">01877715333</p>
+                    {contactLoading ? (
+                      <div className="h-4 bg-gray-200 rounded animate-pulse mt-0.5 w-24"></div>
+                    ) : (
+                      <p className="text-gray-500 text-xs mt-0.5">{contactData?.whatsapp || '01877715333'}</p>
+                    )}
                   </div>
                 </div>
-                <a href="https://wa.me/8801877715333" target="_blank" rel="noopener noreferrer"
+                <a href={`https://wa.me/${contactData?.whatsapp || '8801877715333'}`} target="_blank" rel="noopener noreferrer"
                   className="text-white text-xs font-bold px-5 py-2.5 rounded-xl flex-shrink-0 text-center shadow-sm bg-black hover:bg-neutral-800 transition-colors">
                   {pick(c.waBtn, lang)}
                 </a>
@@ -171,10 +185,14 @@ const ContactSection: React.FC = () => {
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-sm text-black truncate">{pick(c.career, lang)}</p>
-                    <p className="text-gray-500 text-xs mt-0.5 truncate max-w-[180px] sm:max-w-xs">career@shifapropertiesltdgroup.com</p>
+                    {contactLoading ? (
+                      <div className="h-4 bg-gray-200 rounded animate-pulse mt-0.5 w-40"></div>
+                    ) : (
+                      <p className="text-gray-500 text-xs mt-0.5 truncate max-w-[180px] sm:max-w-xs">{contactData?.career || 'career@shifapropertiesltdgroup.com'}</p>
+                    )}
                   </div>
                 </div>
-                <a href="mailto:career@shifapropertiesltdgroup.com" className="text-white text-xs font-bold px-5 py-2.5 rounded-xl flex-shrink-0 text-center shadow-sm bg-black hover:bg-neutral-800 transition-colors">
+                <a href={`mailto:${contactData?.career || 'career@shifapropertiesltdgroup.com'}`} className="text-white text-xs font-bold px-5 py-2.5 rounded-xl flex-shrink-0 text-center shadow-sm bg-black hover:bg-neutral-800 transition-colors">
                   {pick(c.emailBtn, lang)}
                 </a>
               </div>
