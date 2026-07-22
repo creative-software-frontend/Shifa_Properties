@@ -10,7 +10,7 @@ import { UI, pick } from '../../data/translations';
 import { useOurInvestmentList, type OurInvestmentItem } from '../../hooks/useOurInvestmentList';
 import { useOurVision } from '../../hooks/useOurVision';
 import { getImageUrl } from '../../utils/imageUrl';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 25 },

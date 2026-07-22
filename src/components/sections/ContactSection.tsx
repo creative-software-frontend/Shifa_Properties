@@ -8,7 +8,6 @@ import { UI, pick } from '../../data/translations';
 import api from '../../utils/api';
 import { useInvestmentCategories } from '../../hooks/useInvestmentCategories';
 import { useContactManages } from '../../hooks/useContactManages';
-import { useFooterInfo } from '../../hooks/useFooterInfo';
 
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -21,7 +20,6 @@ const ContactSection: React.FC = () => {
 
   const { categories, loading: categoriesLoading } = useInvestmentCategories();
   const { contactData, loading: contactLoading } = useContactManages();
-  const { footerInfo } = useFooterInfo();
 
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', investment_category_id: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
