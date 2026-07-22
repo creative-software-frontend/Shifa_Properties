@@ -1,23 +1,20 @@
-import { useEffect, useState } from "react";
-import { projectApi } from "../api/projectApi";
-import type { Project } from "../types";
+import { useQuery } from '@tanstack/react-query';
+import api from '../utils/api';
+import type { Project } from '../types';
+
+const fetchProjects = async (): Promise<Project[]> => {
+  const { data } = await api.get<{ data: Project[] }>('/v1/project-list');
+  return data.data ?? [];
+};
+
 export const useProjects = () => {
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [loading, setLoading] = useState(true);
-    useEffect(() => {
-        projectApi.getProjects()
-            .then((res) => {
-                setProjects(res.data.data);
-            })
-            .catch((error) => {
-                console.error("Project loading error:", error);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, []);
-    return {
-        projects,
-        loading
-    };
+  const { data, isPending } = useQuery({
+    queryKey: ['projects'],
+    queryFn: fetchProjects,
+  });
+
+  return {
+    projects: data ?? [],
+    loading: isPending && !data,
+  };
 };

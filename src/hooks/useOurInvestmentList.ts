@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import api from '../utils/api';
 
 export interface InvestmentImage {
@@ -34,70 +35,37 @@ export interface OurInvestmentListResponse {
   data: OurInvestmentItem[];
 }
 
-// Module-level cache — survives remounts and StrictMode double-invoke.
-// Stores the in-flight promise so concurrent calls share one request,
-// then stores the resolved data so subsequent mounts skip the network entirely.
-let _cache: OurInvestmentItem[] | null = null;
-let _inFlight: Promise<OurInvestmentItem[]> | null = null;
-
-const fetchOnce = (): Promise<OurInvestmentItem[]> => {
-  if (_cache) return Promise.resolve(_cache);
-  if (_inFlight) return _inFlight;
-
-  _inFlight = api
-    .get<OurInvestmentListResponse>('/v1/our-investment-list')
-    .then((response) => {
-      if (response.data && response.data.success) {
-        const sorted = (response.data.data || []).sort(
-          (a, b) => Number(a.position) - Number(b.position)
-        );
-        _cache = sorted;
-        _inFlight = null;
-        return sorted;
-      }
-      _inFlight = null;
-      throw new Error('Failed to fetch investment list');
-    })
-    .catch((err) => {
-      _inFlight = null;
-      throw err;
-    });
-
-  return _inFlight;
+const fetchOurInvestmentList = async (): Promise<OurInvestmentItem[]> => {
+  const response = await api.get<OurInvestmentListResponse>('/v1/our-investment-list');
+  if (response.data?.success) {
+    // Keep API order — `position` is free text, not a numeric sort key
+    return response.data.data || [];
+  }
+  throw new Error('Failed to fetch investment list');
 };
 
 export const useOurInvestmentList = () => {
-  const [investments, setInvestments] = useState<OurInvestmentItem[]>(_cache ?? []);
-  const [loading, setLoading] = useState<boolean>(!_cache);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isPending, isFetching, isError, error, refetch } = useQuery({
+    queryKey: ['our-investment-list'],
+    queryFn: fetchOurInvestmentList,
+    staleTime: 1000 * 60 * 60,
+  });
 
-  useEffect(() => {
-    if (_cache) {
-      // Data already in cache — nothing to fetch.
-      setInvestments(_cache);
-      setLoading(false);
-      return;
-    }
+  const message = isError
+    ? axios.isAxiosError(error)
+      ? error.response?.status === 429
+        ? 'Too many requests. Please wait a moment and try again.'
+        : error.message
+      : error instanceof Error
+        ? error.message
+        : 'Error fetching investments'
+    : null;
 
-    let cancelled = false;
-    fetchOnce()
-      .then((data) => {
-        if (!cancelled) {
-          setInvestments(data);
-          setLoading(false);
-        }
-      })
-      .catch((err: any) => {
-        if (!cancelled) {
-          setError(err.message || 'Error fetching investments');
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { investments, loading, error };
+  return {
+    investments: data ?? [],
+    loading: isPending && !data,
+    refreshing: isFetching,
+    error: message,
+    refetch,
+  };
 };

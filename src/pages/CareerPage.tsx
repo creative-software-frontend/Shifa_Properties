@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import axios from 'axios';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { ChevronRight, X, UploadCloud, Briefcase, MapPin, Clock, CheckCircle } from 'lucide-react';
 import groupImg from '../assets/image/6fa3ef6e-c22d-45b6-a859-b2108f8af13c.jfif';
@@ -6,6 +7,7 @@ import PageTransition from '../components/PageTransition';
 import PageHero from '../components/PageHero';
 import { useLanguage } from '../context/LanguageContext';
 import { useJobs, type Job } from '../hooks/useJobs';
+import api from '../utils/api';
 
 // Architectural Fluid Floating Keyframe Constants
 const fluidFloatVariants: Variants = {
@@ -39,7 +41,17 @@ const CareerPage: React.FC = () => {
     return lang === 'EN' ? obj.en : obj.bn;
   };
 
-  const { jobs: JOBS_LIST } = useJobs();
+  const { jobs: JOBS_LIST, loading: jobsLoading, error: jobsError, refetch: refetchJobs } = useJobs();
+
+  const formatDeadline = (deadline: string) => {
+    const date = new Date(deadline);
+    if (Number.isNaN(date.getTime())) return deadline;
+    return date.toLocaleDateString(lang === 'EN' ? 'en-US' : 'bn-BD', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -134,45 +146,43 @@ const CareerPage: React.FC = () => {
       formData.append('phone', phone?.value ?? '');
       formData.append('cover_letter', coverLetter?.value ?? '');
       formData.append('resume', selectedFile);
+      formData.append('resume_name', selectedFile.name);
 
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/job-applications`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      // Success can be a JSON payload containing message
-      const data: unknown = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        // Laravel validation shape examples:
-        // { message: '...', errors: { field: ['msg'] } }
       type LaravelErrors = Record<string, string[] | string>;
-      type LaravelResponse = {
+      type ApplicationResponse = {
+        success?: boolean;
         message?: string;
         errors?: LaravelErrors;
       };
 
-      const anyData = data as LaravelResponse;
-      const errors = anyData?.errors;
+      const { data } = await api.post<ApplicationResponse>('/job-applications', formData);
 
-      let firstMsg = '';
-      if (errors && typeof errors === 'object') {
-        const firstKey = Object.keys(errors)[0];
-        const val = errors[firstKey];
-        if (Array.isArray(val) && val.length > 0) firstMsg = String(val[0]);
-        else if (typeof val === 'string') firstMsg = val;
-      }
-
-      const fallback = anyData?.message ? String(anyData.message) : '';
-      throw new Error(firstMsg || fallback || 'Request failed');
-    }
-
-    const successMsg = (data as { message?: unknown }).message ? String((data as { message?: unknown }).message) : '';
-    setSubmitMessage(successMsg);
-    setSubmitSuccess(true);
+      const successMsg = data?.message ? String(data.message) : '';
+      setSubmitMessage(successMsg);
+      setSubmitSuccess(true);
 
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Request failed';
+      type LaravelErrors = Record<string, string[] | string>;
+      type ApplicationErrorResponse = {
+        message?: string;
+        errors?: LaravelErrors;
+      };
+
+      let msg = 'Request failed';
+      if (axios.isAxiosError<ApplicationErrorResponse>(err)) {
+        const resData = err.response?.data;
+        const errors = resData?.errors;
+        let firstMsg = '';
+        if (errors && typeof errors === 'object') {
+          const firstKey = Object.keys(errors)[0];
+          const val = errors[firstKey];
+          if (Array.isArray(val) && val.length > 0) firstMsg = String(val[0]);
+          else if (typeof val === 'string') firstMsg = val;
+        }
+        msg = firstMsg || resData?.message || (err.response?.status === 429 ? 'Too many requests. Please wait a moment and try again.' : err.message);
+      } else if (err instanceof Error) {
+        msg = err.message;
+      }
       setFormErrorMessage(msg);
       setSubmitSuccess(false);
     } finally {
@@ -262,57 +272,106 @@ const CareerPage: React.FC = () => {
             <div className="bg-white rounded-[var(--radius-lg)] shadow-card border border-gray-100 overflow-hidden">
               {/* Header (Hidden on Mobile, Grid on Desktop) */}
               <div className="hidden md:grid md:grid-cols-12 gap-4 bg-sky-50/60 border-b border-gray-100 px-8 py-5 text-sm font-bold tracking-wider uppercase text-[var(--color-primary)]">
-                <div className="col-span-5">{lang === 'EN' ? 'Role' : 'পদবী'}</div>
+                <div className="col-span-4">{lang === 'EN' ? 'Role' : 'পদবী'}</div>
                 <div className="col-span-3">{lang === 'EN' ? 'Department' : 'বিভাগ'}</div>
                 <div className="col-span-2">{lang === 'EN' ? 'Deadline' : 'শেষ তারিখ'}</div>
+                <div className="col-span-1">{lang === 'EN' ? 'Status' : 'অবস্থা'}</div>
                 <div className="col-span-2 text-right">{lang === 'EN' ? 'Action' : 'পদক্ষেপ'}</div>
               </div>
 
-              {/* Rows (Card on Mobile, Row on Desktop Layout) */}
-              <div className="divide-y divide-gray-100">
-                {JOBS_LIST.map((job) => (
-                  <div
-                    key={job.id}
-                    className="flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 md:items-center px-6 md:px-8 py-5 md:py-6 hover:bg-sky-50/20 transition-all duration-300 group"
+              {/* Loading state */}
+              {jobsLoading && (
+                <div className="divide-y divide-gray-100">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="px-6 md:px-8 py-6">
+                      <div className="h-4 w-2/3 bg-gray-100 rounded animate-pulse mb-2" />
+                      <div className="h-3 w-1/3 bg-gray-100 rounded animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Error state */}
+              {!jobsLoading && jobsError && (
+                <div className="text-center py-14 px-6">
+                  <p className="text-rose-600 font-medium">
+                    {lang === 'EN' ? 'Unable to load job openings.' : 'চাকরির তালিকা লোড করা যায়নি।'}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">{jobsError}</p>
+                  <button
+                    type="button"
+                    onClick={() => refetchJobs()}
+                    className="mt-4 inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-rose-600 text-white text-xs font-bold uppercase tracking-wider hover:bg-rose-700 transition-colors"
                   >
-                    {/* Role & Adaptive Typography Controls */}
-                    <div className="col-span-5 flex flex-col gap-0.5">
-                      <div className="font-bold text-[var(--color-dark)] text-base sm:text-lg tracking-tight group-hover:text-[var(--color-accent)] transition-colors line-clamp-2 md:line-clamp-none">
-                        {pick(job.role)}
-                      </div>
-                      <div className="md:hidden flex items-center text-xs sm:text-sm text-[var(--color-gray)] gap-1 mt-1.5">
-                        <Briefcase className="w-3.5 h-3.5" /> {pick(job.department)}
-                      </div>
-                      <div className="flex items-center text-xs text-[var(--color-gray)] gap-1 mt-1">
-                        <MapPin className="w-3.5 h-3.5 text-[var(--color-secondary)]" /> {pick(job.location)}
-                      </div>
-                    </div>
+                    {lang === 'EN' ? 'Try again' : 'আবার চেষ্টা করুন'}
+                  </button>
+                </div>
+              )}
 
-                    {/* Department Desktop */}
-                    <div className="hidden md:flex col-span-3 items-center text-sm font-medium text-[var(--color-gray)]">
-                      <Briefcase className="w-4 h-4 mr-2 text-[var(--color-accent)]/80 flex-shrink-0" /> {pick(job.department)}
-                    </div>
+              {/* Empty state */}
+              {!jobsLoading && !jobsError && JOBS_LIST.length === 0 && (
+                <div className="text-center py-14 px-6">
+                  <p className="text-[var(--color-gray)]">
+                    {lang === 'EN' ? 'No open positions right now. Please check back soon.' : 'এই মুহূর্তে কোনো খালি পদ নেই। শীঘ্রই আবার দেখুন।'}
+                  </p>
+                </div>
+              )}
 
-                    {/* Deadline Desktop/Mobile */}
-                    <div className="col-span-2 flex items-center text-xs sm:text-sm text-[var(--color-gray)] md:font-medium mt-1 md:mt-0">
-                      <Clock className="w-4 h-4 mr-2 text-rose-400 flex-shrink-0" /> {pick(job.deadline)}
-                    </div>
+              {/* Rows (Card on Mobile, Row on Desktop Layout) */}
+              {!jobsLoading && !jobsError && JOBS_LIST.length > 0 && (
+                <div className="divide-y divide-gray-100">
+                  {JOBS_LIST.map((job) => (
+                    <div
+                      key={job.id}
+                      className="flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 md:items-center px-6 md:px-8 py-5 md:py-6 hover:bg-sky-50/20 transition-all duration-300 group"
+                    >
+                      {/* Role & Adaptive Typography Controls */}
+                      <div className="col-span-4 flex flex-col gap-0.5">
+                        <div className="font-bold text-[var(--color-dark)] text-base sm:text-lg tracking-tight group-hover:text-[var(--color-accent)] transition-colors line-clamp-2 md:line-clamp-none">
+                          {pick(job.role)}
+                        </div>
+                        <div className="md:hidden flex items-center text-xs sm:text-sm text-[var(--color-gray)] gap-1 mt-1.5">
+                          <Briefcase className="w-3.5 h-3.5" /> {pick(job.department)}
+                        </div>
+                        <div className="flex items-center text-xs text-[var(--color-gray)] gap-1 mt-1">
+                          <MapPin className="w-3.5 h-3.5 text-[var(--color-secondary)]" /> {pick(job.location)}
+                        </div>
+                      </div>
 
-                    {/* Action Apply Trigger Button */}
-                    <div className="col-span-2 flex justify-start md:justify-end mt-3 md:mt-0">
-                      <button
-                        onClick={() => handleApplyClick(job)}
-                        className="group/btn relative w-full md:w-auto inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-full border border-[var(--color-accent)] px-5 py-2 text-[var(--color-accent)] transition-all duration-200 hover:bg-[var(--color-accent)] hover:text-white"
-                      >
-                        <span className="font-bold text-xs tracking-wide whitespace-nowrap">
-                          {lang === 'EN' ? 'Apply Now' : 'আবেদন করুন'}
+                      {/* Department Desktop */}
+                      <div className="hidden md:flex col-span-3 items-center text-sm font-medium text-[var(--color-gray)]">
+                        <Briefcase className="w-4 h-4 mr-2 text-[var(--color-accent)]/80 flex-shrink-0" /> {pick(job.department)}
+                      </div>
+
+                      {/* Deadline Desktop/Mobile */}
+                      <div className="col-span-2 flex items-center text-xs sm:text-sm text-[var(--color-gray)] md:font-medium mt-1 md:mt-0">
+                        <Clock className="w-4 h-4 mr-2 text-rose-400 flex-shrink-0" /> {formatDeadline(job.deadline)}
+                      </div>
+
+                      {/* Status */}
+                      <div className="col-span-1 flex items-center mt-1 md:mt-0">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-emerald-100 text-emerald-700">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          {job.status === 'active' ? (lang === 'EN' ? 'Active' : 'সক্রিয়') : job.status}
                         </span>
-                        <ChevronRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-1" />
-                      </button>
+                      </div>
+
+                      {/* Action Apply Trigger Button */}
+                      <div className="col-span-2 flex justify-start md:justify-end mt-3 md:mt-0">
+                        <button
+                          onClick={() => handleApplyClick(job)}
+                          className="group/btn relative w-full md:w-auto inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-full border border-[var(--color-accent)] px-5 py-2 text-[var(--color-accent)] transition-all duration-200 hover:bg-[var(--color-accent)] hover:text-white"
+                        >
+                          <span className="font-bold text-xs tracking-wide whitespace-nowrap">
+                            {lang === 'EN' ? 'Apply Now' : 'আবেদন করুন'}
+                          </span>
+                          <ChevronRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>

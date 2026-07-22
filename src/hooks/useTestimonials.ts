@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useQuery } from '@tanstack/react-query';
+import api from '../utils/api';
 
 export interface Testimonial {
   id: number;
@@ -10,23 +11,16 @@ export interface Testimonial {
   image?: string;
 }
 
+const fetchTestimonials = async (): Promise<Testimonial[]> => {
+  const { data } = await api.get<{ data?: Testimonial[] }>('/v1/investor-say-list');
+  return data.data ?? [];
+};
+
 export const useTestimonials = () => {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isPending } = useQuery({
+    queryKey: ['testimonials'],
+    queryFn: fetchTestimonials,
+  });
 
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/investor-say-list`)
-      .then((res) => res.json())
-      .then((res) => {
-        setTestimonials(res.data || []);
-      })
-      .catch((err) => {
-        console.error("Testimonials fetch failed:", err);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
-
-  return { testimonials, loading };
+  return { testimonials: data ?? [], loading: isPending && !data };
 };

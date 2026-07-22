@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useQuery } from '@tanstack/react-query';
+import api from '../utils/api';
 
-const IMAGE_BASE_URL =
-  "https://backend.shifaproperties.com/public/";
+const IMAGE_BASE_URL = import.meta.env.VITE_FILE_BASE_URL?.replace(/\/$/, '') + '/';
 
 export interface News {
   id: number;
@@ -10,30 +10,25 @@ export interface News {
   photo: string;
   news_paper_name: string;
   created_at: string;
-
   news_type: {
     id: number;
     title: string;
   } | null;
 }
 
+const fetchNews = async (): Promise<News[]> => {
+  const { data } = await api.get<{ data: News[] }>('/v1/news-list');
+  return (data.data ?? []).map((item) => ({
+    ...item,
+    photo: IMAGE_BASE_URL + item.photo.replace(/^\/+/, ''),
+  }));
+};
+
 export const useNews = () => {
-  const [news, setNews] = useState<News[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isPending } = useQuery({
+    queryKey: ['news'],
+    queryFn: fetchNews,
+  });
 
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/news-list`)
-      .then(res => res.json())
-      .then(res => {
-        const formatted = res.data.map((item: News) => ({
-          ...item,
-          photo: IMAGE_BASE_URL + item.photo,
-        }));
-
-        setNews(formatted);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { news, loading };
+  return { news: data ?? [], loading: isPending && !data };
 };

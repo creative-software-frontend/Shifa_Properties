@@ -3,6 +3,7 @@ import ServicesSection from '../components/sections/ServicesSection';
 import AboutSection from '../components/sections/AboutSection';
 import StatsSection from '../components/sections/StatsSection';
 import ProjectsPreviewSection from '../components/sections/ProjectsPreviewSection';
+import OwnerBenefitSection from '../components/sections/OwnerBenefitSection';
 import NewsPreviewSection from '../components/sections/NewsPreviewSection';
 import GallerySection from '../components/sections/GallerySection';
 import TestimonialsSection from '../components/sections/TestimonialsSection';
@@ -17,6 +18,7 @@ const LandingPage: React.FC = () => (
       <AboutSection />
       <StatsSection />
       <ProjectsPreviewSection />
+      <OwnerBenefitSection />
       <NewsPreviewSection />
       <GallerySection />
       <TestimonialsSection />

@@ -10,6 +10,7 @@ import LandingPage  from './pages/LandingPage';
 import CareerPage   from './pages/CareerPage';
 import AboutPage    from './pages/AboutPage';
 import NewsPage     from './pages/NewsPage';
+import NewsDetailsPage from './pages/NewsDetailsPage';
 import ProjectsPage from './pages/ProjectsPage';
 import TeamPage     from './pages/TeamPage';
 import ContactPage  from './pages/ContactPage';
@@ -50,6 +51,7 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/careers" element={<CareerPage />} />
         <Route path="/news" element={<NewsPage />} />
+        <Route path="/news/:id" element={<NewsDetailsPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/our-team" element={<TeamPage />} />
         <Route path="/contact" element={<ContactPage />} />

@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useQuery } from '@tanstack/react-query';
+import api from '../utils/api';
 
 export interface VisionData {
   id: number;
@@ -9,33 +10,19 @@ export interface VisionData {
   updated_at: string;
 }
 
+const fetchOurVision = async (): Promise<VisionData | null> => {
+  const { data } = await api.get<{ success?: boolean; data?: VisionData[] }>('/v1/our-vision-list');
+  if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+    return data.data[0];
+  }
+  return null;
+};
+
 export const useOurVision = () => {
-  const [visionData, setVisionData] = useState<VisionData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data, isPending } = useQuery({
+    queryKey: ['our-vision'],
+    queryFn: fetchOurVision,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/our-vision-list`)
-      .then((res) => res.json())
-      .then((res) => {
-        if (cancelled) return;
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          setVisionData(res.data[0]);
-        } else {
-          setVisionData(null);
-        }
-      })
-      .catch((err) => {
-        console.error("Our vision fetch failed:", err);
-        setVisionData(null);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { visionData, loading };
+  return { visionData: data ?? null, loading: isPending && data === undefined };
 };

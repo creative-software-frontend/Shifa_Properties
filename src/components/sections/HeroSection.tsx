@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBanners } from '../../hooks/useBanners';
 import { useLanguage } from '../../context/LanguageContext';
@@ -68,7 +69,56 @@ const prev = () => {
   }, [current, banners.length]);
 
   const slide = UI.heroSlides[current] || UI.heroSlides[0];
+  const ctaHref = slideData.ctaLink?.trim() || '/projects';
+  const ctaLabel = pick(slide.cta, lang);
+  const ctaClassName =
+    'btn-gold font-semibold text-sm px-8 py-3.5 uppercase tracking-wider transition-transform duration-200 hover:scale-105';
+  const ctaStyle = { boxShadow: '0 4px 15px rgba(0, 0, 0, 0.15)' };
 
+  const renderExploreCta = () => {
+    if (ctaHref.startsWith('#')) {
+      return (
+        <a
+          href={ctaHref}
+          id={`hero-cta-${slideData.id}`}
+          className={ctaClassName}
+          style={ctaStyle}
+          onClick={(e) => {
+            e.preventDefault();
+            document.querySelector(ctaHref)?.scrollIntoView({ behavior: 'smooth' });
+          }}
+        >
+          {ctaLabel}
+        </a>
+      );
+    }
+
+    if (ctaHref.startsWith('http://') || ctaHref.startsWith('https://')) {
+      return (
+        <a
+          href={ctaHref}
+          id={`hero-cta-${slideData.id}`}
+          className={ctaClassName}
+          style={ctaStyle}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {ctaLabel}
+        </a>
+      );
+    }
+
+    return (
+      <Link
+        to={ctaHref}
+        id={`hero-cta-${slideData.id}`}
+        className={ctaClassName}
+        style={ctaStyle}
+      >
+        {ctaLabel}
+      </Link>
+    );
+  };
 
   return (
     <section
@@ -167,28 +217,13 @@ const prev = () => {
               transition={{ delay: 0.60 }}
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
-              <a
-                href={slideData.ctaLink || ''}
-                onClick={(e) => {
-                  const ctaLink = slideData.ctaLink || '';
-                  if (ctaLink.startsWith('#')) {
-                    e.preventDefault();
-                    document.querySelector(ctaLink)?.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-
-                id={`hero-cta-${slideData.id}`}
-                className="btn-gold font-semibold text-sm px-8 py-3.5 uppercase tracking-wider transition-transform duration-200 hover:scale-105"
-                style={{ boxShadow: '0 4px 15px rgba(0, 0, 0, 0.15)' }}
-              >
-                {pick(slide.cta, lang)}
-              </a>
+              {renderExploreCta()}
 
               <a
-                href="#about"
+                href="#services"
                 onClick={(e) => {
                   e.preventDefault();
-                  document.querySelector('#about')?.scrollIntoView({ behavior: 'smooth' });
+                  document.querySelector('#services')?.scrollIntoView({ behavior: 'smooth' });
                 }}
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full
              text-sm font-semibold uppercase tracking-wider
@@ -201,7 +236,7 @@ const prev = () => {
                   textShadow: 'none',
                 }}
               >
-                {pick(UI.hero.whoWeAre, lang)}
+                {pick(UI.services.learnMore, lang)}
               </a>
             </motion.div>
           </motion.div>

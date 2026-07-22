@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 // Premium Icons replacing primitive emojis to handle alignment cleaner
 import { Phone, Mail, MessageSquare, Briefcase } from 'lucide-react';
-import officeImg from '../../assets/image/bd4d72ea-ec2b-405e-b8e7-d09eb87cf0bd.jfif';
 import { useLanguage } from '../../context/LanguageContext';
 import { UI, pick } from '../../data/translations';
 import api from '../../utils/api';
@@ -93,17 +92,7 @@ const ContactSection: React.FC = () => {
     <section id="contact" className="overflow-hidden">
 
       {/* ── HERO BANNER & CONTACT QUICK LINKS ── */}
-      <div className="relative overflow-hidden" style={{ background: '#e8f4fd' }}>
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-          <span className="font-black tracking-tighter leading-none whitespace-nowrap"
-            style={{ fontSize: 'clamp(80px, 18vw, 220px)', color: 'rgba(0,0,0,0.05)', fontFamily: 'Playfair Display, serif' }}>
-            {pick(c.watermark, lang)}
-          </span>
-        </div>
-        <div className="absolute inset-0">
-          <img src={officeImg} alt="Shifa Properties Ltd Office" className="w-full h-full object-cover opacity-15" />
-        </div>
-
+      <div className="relative overflow-hidden bg-white">
         <div className="relative z-10 py-16 px-4 flex flex-col items-center">
           {/* Expanded max-w-2xl to max-w-4xl to prevent layout breaks on long text blocks */}
           <motion.div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 md:p-10 w-full max-w-4xl border border-sky-100"
@@ -205,12 +194,10 @@ const ContactSection: React.FC = () => {
       {/* ── INQUIRY FORM ── */}
       <div className="py-16 px-4 bg-white border-t border-sky-100">
         <div className="max-w-4xl mx-auto">
-          <motion.div className="bg-sky-50/50 rounded-3xl p-8 md:p-12 border border-sky-100 shadow-sm relative overflow-hidden"
+          <motion.div className="bg-white rounded-3xl p-8 md:p-12 border border-sky-100 shadow-sm"
             variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }}>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gold-200/20 rounded-full blur-2xl" />
-            <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-blue-200/20 rounded-full blur-3xl" />
 
-            <div className="relative z-10">
+            <div>
               <h2 className="text-center font-black text-2xl md:text-3xl mb-2 text-black" style={{ fontFamily: 'Playfair Display, serif' }}>
                 {pick(c.formTitle, lang)}
               </h2>

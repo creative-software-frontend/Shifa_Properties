@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import api from '../utils/api';
 
 export interface FooterInfo {
   id: number;
@@ -12,34 +14,44 @@ export interface FooterInfo {
   sales_hotline: string;
   office_hours: string;
   corporate_status: string;
-  reg_no: string;
-  trading_id: string;
+  reg_no: string | null;
+  trading_id: string | null;
   created_at: string;
   updated_at: string;
 }
 
+interface FooterInfoResponse {
+  success?: boolean;
+  data?: FooterInfo | null;
+}
+
+const fetchFooterInfo = async (): Promise<FooterInfo | null> => {
+  const { data } = await api.get<FooterInfoResponse>('/v1/footer-footer-info');
+  if (data?.success === false) return null;
+  return data?.data ?? null;
+};
+
 export const useFooterInfo = () => {
-  const [footerInfo, setFooterInfo] = useState<FooterInfo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data, isPending, error, refetch } = useQuery({
+    queryKey: ['footer-footer-info'],
+    queryFn: fetchFooterInfo,
+    staleTime: 1000 * 60 * 30,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/footer-footer-info`)
-      .then((res) => res.json())
-      .then((res) => {
-        if (cancelled) return;
-        setFooterInfo(res.data ?? null);
-      })
-      .catch((err) => {
-        console.error("Footer info fetch failed:", err);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const message = error
+    ? axios.isAxiosError(error)
+      ? error.response?.status === 429
+        ? 'Too many requests. Please wait a moment and try again.'
+        : error.message
+      : error instanceof Error
+        ? error.message
+        : 'Error fetching footer info'
+    : null;
 
-  return { footerInfo, loading };
+  return {
+    footerInfo: data ?? null,
+    loading: isPending && data === undefined,
+    error: message,
+    refetch,
+  };
 };

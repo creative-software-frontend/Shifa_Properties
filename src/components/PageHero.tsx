@@ -20,9 +20,13 @@ const PageHero: React.FC<PageHeroProps> = ({ title, subtitle, imageSrc }) => {
         <img
           src={imageSrc}
           alt={title}
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover object-center brightness-[1.05]"
         />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg,rgba(10,10,30,0.85),rgba(26,35,126,0.75))' }} />
+        {/* Lighter overlay so the background image stays clear and visible */}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(135deg, rgba(10,10,30,0.45), rgba(26,35,126,0.35))' }}
+        />
       </motion.div>
 
       {/* Text Content with Staggered Fade Up */}

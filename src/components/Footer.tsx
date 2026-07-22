@@ -7,8 +7,6 @@ import {
   Clock,
   ArrowUpRight,
   Building2,
-  FileText,
-  ShieldAlert,
   BookmarkCheck,
   Globe
 } from 'lucide-react';
@@ -40,6 +38,16 @@ const YouTubeIcon = (
     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93 .502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
   </svg>
 );
+const XTwitterIcon = (
+  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.743l7.227-8.451L1.5 2.25h7.04l4.213 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
+  </svg>
+);
+const WhatsAppIcon = (
+  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+  </svg>
+);
 
 // Maps a backend platform slug to its inline SVG icon + hover color.
 const SOCIAL_PLATFORM_MAP: Record<
@@ -47,9 +55,14 @@ const SOCIAL_PLATFORM_MAP: Record<
   { icon: React.ReactNode; color: string }
 > = {
   facebook: { icon: FacebookIcon, color: 'hover:bg-[#1877F2] hover:border-[#1877F2]' },
+  fb: { icon: FacebookIcon, color: 'hover:bg-[#1877F2] hover:border-[#1877F2]' },
   instagram: { icon: InstagramIcon, color: 'hover:bg-[#E4405F] hover:border-[#E4405F]' },
+  ig: { icon: InstagramIcon, color: 'hover:bg-[#E4405F] hover:border-[#E4405F]' },
   linkedin: { icon: LinkedInIcon, color: 'hover:bg-[#0A66C2] hover:border-[#0A66C2]' },
   youtube: { icon: YouTubeIcon, color: 'hover:bg-[#FF0000] hover:border-[#FF0000]' },
+  twitter: { icon: XTwitterIcon, color: 'hover:bg-[#000000] hover:border-[#000000]' },
+  x: { icon: XTwitterIcon, color: 'hover:bg-[#000000] hover:border-[#000000]' },
+  whatsapp: { icon: WhatsAppIcon, color: 'hover:bg-[#25D366] hover:border-[#25D366]' },
 };
 
 // Fallback used when the backend returns no active links.
@@ -69,13 +82,23 @@ const Footer: React.FC = () => {
 
   // Use backend links when available; otherwise fall back to the static set.
   const SOCIALS = socialLinks.length
-    ? socialLinks.map((link) => ({
-        id: link.id,
-        label: link.platform,
-        href: link.url,
-        platform: link.platform,
-      }))
+    ? socialLinks.map((link) => {
+        const platform = link.platform.toLowerCase();
+        return {
+          id: link.id,
+          label: link.platform,
+          href: link.url,
+          platform,
+        };
+      })
     : FALLBACK_SOCIALS;
+
+  const regNo = footerInfo?.reg_no?.trim() || 'C-XXXXXX';
+  const tradingId = footerInfo?.trading_id?.trim() || '—';
+  const salesTel = footerInfo?.sales_hotline
+    ? `tel:${footerInfo.sales_hotline.split(/[\s,]+/)[0]}`
+    : 'tel:+8801805019801';
+
   const CONTACT_INFO = [
     {
       icon: MapPin,
@@ -105,7 +128,7 @@ const Footer: React.FC = () => {
       icon: BookmarkCheck,
       title: pick(UI.footer.contactTitles.salesDesk, lang),
       value: footerInfo?.sales_hotline || '01805 019801, 01805 019802',
-      href: footerInfo?.sales_hotline ? `tel:${footerInfo.sales_hotline.split(',')[0]}` : 'tel:+8801805019801',
+      href: salesTel,
       highlight: true
     },
     {
@@ -119,21 +142,12 @@ const Footer: React.FC = () => {
     {
       title: pick(UI.footer.portfolioCol, lang),
       links: [
-        { label: pick(UI.footer.quickLinks.coxsBazarHotel, lang), href: '/portfolio/coxs-bazar' },
-        { label: pick(UI.footer.quickLinks.kuakataGrand, lang), href: '/portfolio/kuakata' },
-        { label: pick(UI.footer.quickLinks.padmaRiverside, lang), href: '/portfolio/padma-view' },
+        { label: pick(UI.footer.quickLinks.coxsBazarHotel, lang), href: '/projects?q=cox' },
+        { label: pick(UI.footer.quickLinks.kuakataGrand, lang), href: '/projects?q=kuakata' },
+        { label: pick(UI.footer.quickLinks.padmaRiverside, lang), href: '/projects?q=padma' },
         { label: pick(UI.footer.quickLinks.upcomingProjects, lang), href: '/projects' },
-      ]
+      ],
     },
-    {
-      title: pick(UI.footer.companyCol, lang),
-      links: [
-        { label: pick(UI.footer.quickLinks.aboutShifa, lang), href: '/about' },
-        { label: pick(UI.footer.quickLinks.boardOfDirectors, lang), href: '/leadership' },
-        { label: pick(UI.footer.quickLinks.investorRelations, lang), href: '/investors' },
-        { label: pick(UI.footer.quickLinks.careerOpportunities, lang), href: '/careers' },
-      ]
-    }
   ];
 
   return (
@@ -272,7 +286,7 @@ const Footer: React.FC = () => {
         </div>
 
         {/* MIDDLE LAYER */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 py-12 border-b border-slate-200">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 py-12 border-b border-slate-200">
           {QUICK_LINKS.map((col) => (
             <div key={col.title} className="space-y-4">
               <div>
@@ -296,7 +310,7 @@ const Footer: React.FC = () => {
           ))}
 
           {/* Compliance Card */}
-          <div className="sm:col-span-2 space-y-4">
+          <div className="md:col-span-2 space-y-4">
             <h4 className="text-slate-900 font-bold text-xs tracking-widest uppercase">{pick(UI.footer.corporateStatus, lang)}</h4>
             <div className="w-6 h-[2px] mt-2 rounded-full bg-[#C9A84C]" />
             <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2 shadow-sm">
@@ -307,9 +321,7 @@ const Footer: React.FC = () => {
                     {footerInfo?.corporate_status || pick(UI.footer.complianceText, lang)}
                   </p>
                   <p className="text-[10px] font-mono text-slate-500 tracking-wider font-semibold">
-                    {footerInfo
-                      ? `REG REGISTRATION NO: ${footerInfo.reg_no} / RJSC TRADING ID: ${footerInfo.trading_id}`
-                      : 'REG REGISTRATION NO: C-XXXXXX / RJSC TRADING ID: XXXXX'}
+                    REG REGISTRATION NO: {regNo} / RJSC TRADING ID: {tradingId}
                   </p>
                 </div>
               </div>
@@ -323,18 +335,6 @@ const Footer: React.FC = () => {
             <p className="text-slate-600 text-xs lg:whitespace-nowrap font-medium">
               © {currentYear} Shifa Properties Ltd Group. {pick(UI.footer.copyrightFull, lang)}
             </p>
-
-            <span className="hidden md:inline text-slate-400">|</span>
-
-            <div className="flex items-center justify-center gap-4 flex-shrink-0">
-              <Link to="/privacy" className="text-slate-600 hover:text-slate-900 text-xs transition-colors flex items-center gap-1 whitespace-nowrap font-medium">
-                <ShieldAlert className="w-3 h-3 text-[#C9A84C]" /> {pick(UI.footer.privacyPolicy, lang)}
-              </Link>
-              <span className="text-slate-400">|</span>
-              <Link to="/terms" className="text-slate-600 hover:text-slate-900 text-xs transition-colors flex items-center gap-1 whitespace-nowrap font-medium">
-                <FileText className="w-3 h-3 text-[#C9A84C]" /> {pick(UI.footer.termsOfService, lang)}
-              </Link>
-            </div>
           </div>
 
           {/* Software Integrator Seal */}

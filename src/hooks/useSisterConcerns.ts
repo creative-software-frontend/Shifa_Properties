@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useQuery } from '@tanstack/react-query';
+import api from '../utils/api';
 
 export interface SisterConcern {
   id: number;
@@ -8,28 +9,16 @@ export interface SisterConcern {
   updated_at: string;
 }
 
+const fetchSisterConcerns = async (): Promise<SisterConcern[]> => {
+  const { data } = await api.get<{ data?: SisterConcern[] }>('/v1/sister-concerns');
+  return data.data ?? [];
+};
+
 export const useSisterConcerns = () => {
-  const [sisterConcerns, setSisterConcerns] = useState<SisterConcern[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isPending } = useQuery({
+    queryKey: ['sister-concerns'],
+    queryFn: fetchSisterConcerns,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/sister-concerns`)
-      .then((res) => res.json())
-      .then((res) => {
-        if (cancelled) return;
-        setSisterConcerns(res.data ?? []);
-      })
-      .catch((err) => {
-        console.error("Sister concerns fetch failed:", err);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { sisterConcerns, loading };
+  return { sisterConcerns: data ?? [], loading: isPending && !data };
 };

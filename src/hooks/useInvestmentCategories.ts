@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import api from '../utils/api';
 
 export interface InvestmentCategory {
@@ -11,29 +12,33 @@ export interface InvestmentCategoryResponse {
   data: InvestmentCategory[];
 }
 
+const fetchInvestmentCategories = async (): Promise<InvestmentCategory[]> => {
+  const response = await api.get<InvestmentCategoryResponse>('/v1/investment-category-list');
+  if (response.data?.success) {
+    return response.data.data ?? [];
+  }
+  throw new Error('Failed to fetch investment categories');
+};
+
 export const useInvestmentCategories = () => {
-  const [categories, setCategories] = useState<InvestmentCategory[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isPending, error } = useQuery({
+    queryKey: ['investment-categories'],
+    queryFn: fetchInvestmentCategories,
+  });
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await api.get<InvestmentCategoryResponse>('/v1/investment-category-list');
-        if (response.data && response.data.success) {
-          setCategories(response.data.data);
-        } else {
-          setError('Failed to fetch investment categories');
-        }
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'Error fetching categories');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const message = error
+    ? axios.isAxiosError(error)
+      ? error.response?.status === 429
+        ? 'Too many requests. Please wait a moment and try again.'
+        : error.message
+      : error instanceof Error
+        ? error.message
+        : 'Error fetching categories'
+    : null;
 
-    fetchCategories();
-  }, []);
-
-  return { categories, loading, error };
+  return {
+    categories: data ?? [],
+    loading: isPending && !data,
+    error: message,
+  };
 };

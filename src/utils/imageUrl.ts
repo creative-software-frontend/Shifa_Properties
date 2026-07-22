@@ -6,7 +6,11 @@ const IMAGE_BASE_URL = import.meta.env.VITE_FILE_BASE_URL;
 export const getImageUrl = (path: string) => {
     if (!path) return "";
     const cleanPath = path.replace(/^\/+/, "");
-    return `${IMAGE_BASE_URL.replace(/\/$/, "")}/${cleanPath}`;
+    const encoded = cleanPath
+        .split("/")
+        .map((segment) => encodeURIComponent(segment))
+        .join("/");
+    return `${IMAGE_BASE_URL.replace(/\/$/, "")}/${encoded}`;
 };
 
 // Image-only fallback for Project cards.

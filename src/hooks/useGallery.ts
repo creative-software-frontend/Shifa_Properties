@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import api from '../utils/api';
 
 export interface GalleryItem {
   id: number;
@@ -10,34 +11,21 @@ export interface GalleryItem {
   updated_at: string;
 }
 
+const fetchGallery = async (): Promise<GalleryItem[]> => {
+  const { data } = await api.get<{ success?: boolean; data?: GalleryItem[] }>('/v1/image-gallery-list');
+  if (data.success && data.data) return data.data;
+  throw new Error('Invalid gallery response');
+};
+
 export const useGallery = () => {
-  const [gallery, setGallery] = useState<GalleryItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { data, isPending, error } = useQuery({
+    queryKey: ['gallery'],
+    queryFn: fetchGallery,
+  });
 
-  useEffect(() => {
-    const fetchGallery = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/image-gallery-list`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch gallery items');
-        }
-        const json = await response.json();
-        if (json.success && json.data) {
-          setGallery(json.data);
-        } else {
-           throw new Error('Invalid response structure');
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Unknown error'));
-        console.error('Error fetching gallery:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchGallery();
-  }, []);
-
-  return { gallery, loading, error };
+  return {
+    gallery: data ?? [],
+    loading: isPending && !data,
+    error: error instanceof Error ? error : null,
+  };
 };

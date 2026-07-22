@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import api from '../utils/api';
 
 export interface ContactManageData {
@@ -11,28 +11,23 @@ export interface ContactManageData {
   updated_at?: string;
 }
 
+const fetchContactManages = async (): Promise<ContactManageData | null> => {
+  const { data } = await api.get<{ success?: boolean; data?: ContactManageData[] }>('/v1/contact-manages');
+  if (data.success && data.data && data.data.length > 0) {
+    return data.data[0];
+  }
+  return null;
+};
+
 export const useContactManages = () => {
-  const [contactData, setContactData] = useState<ContactManageData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isPending, error } = useQuery({
+    queryKey: ['contact-manages'],
+    queryFn: fetchContactManages,
+  });
 
-  useEffect(() => {
-    const fetchContactInfo = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get('/v1/contact-manages');
-        if (response.data.success && response.data.data.length > 0) {
-          setContactData(response.data.data[0]);
-        }
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch contact info');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchContactInfo();
-  }, []);
-
-  return { contactData, loading, error };
+  return {
+    contactData: data ?? null,
+    loading: isPending && data === undefined,
+    error: error instanceof Error ? error.message : null,
+  };
 };

@@ -114,7 +114,7 @@ const AboutSection: React.FC = () => {
                   transition={{ duration: 0.7 }}
                   src={img2}
                   alt="Shifa Properties Ltd luxury Hotel pool and facade"
-                  className="w-full h-full object-cover origin-center"
+                  className="w-full h-full object-cover origin-center brightness-[1.06]"
                 />
               </motion.div>
 

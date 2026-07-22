@@ -131,7 +131,7 @@ const Navbar: React.FC = () => {
         {/* ── LEFT LOGO ── */}
         <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0" id="nav-logo-left">
           <img
-            src={websiteLogo}
+            src={websiteLogo || undefined}
             alt="Shifa Properties Ltd Group Logo"
             className="w-14 h-14 rounded-full object-contain transition-transform duration-300 group-hover:scale-105"
           />
@@ -244,7 +244,7 @@ const Navbar: React.FC = () => {
           {/* Right-side secondary logo */}
           <Link to="/" className="flex items-center gap-2 group" id="nav-logo-right">
             <img
-              src={headerLogo}
+              src={headerLogo || undefined}
               alt="Shifa Properties Ltd Group"
               className="w-10 h-10 rounded-full object-contain bg-white border border-gold-300 shadow-gold transition-transform duration-300 group-hover:scale-105"
               style={{ padding: '0px' }}

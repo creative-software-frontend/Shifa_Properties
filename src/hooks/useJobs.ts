@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import api from '../utils/api';
 
 export interface Job {
   id: number;
@@ -8,32 +10,39 @@ export interface Job {
   deadline: string;
   description: string | null;
   status: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
+// Note: this endpoint is not versioned (no `/v1` prefix), unlike most other endpoints.
+// Full URL resolves to: https://backend.shifaproperties.com/api/job-post-list
+const fetchJobs = async (): Promise<Job[]> => {
+  const { data } = await api.get<Job[] | { data: Job[] }>('/job-post-list');
+  const list = Array.isArray(data) ? data : data?.data ?? [];
+  return list.filter((job) => job.status === 'active');
+};
+
 export const useJobs = () => {
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { data, isPending, error, refetch } = useQuery({
+    queryKey: ['job-post-list'],
+    queryFn: fetchJobs,
+    staleTime: 1000 * 60 * 10,
+  });
 
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/job-post-list`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch jobs');
-        }
-        const data: Job[] = await response.json();
-        setJobs(data.filter((job) => job.status === 'active'));
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Unknown error'));
-        console.error('Error fetching jobs:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const message = error
+    ? axios.isAxiosError(error)
+      ? error.response?.status === 429
+        ? 'Too many requests. Please wait a moment and try again.'
+        : error.message
+      : error instanceof Error
+        ? error.message
+        : 'Error fetching job openings'
+    : null;
 
-    fetchJobs();
-  }, []);
-
-  return { jobs, loading, error };
+  return {
+    jobs: data ?? [],
+    loading: isPending && data === undefined,
+    error: message,
+    refetch,
+  };
 };

@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { getImageUrl } from "../utils/imageUrl";
+import { useQuery } from '@tanstack/react-query';
+import api from '../utils/api';
+import { getImageUrl } from '../utils/imageUrl';
 
 export interface WhyUsItem {
   id: number;
@@ -11,35 +12,23 @@ export interface WhyUsItem {
   updated_at: string;
 }
 
+const fetchWhyUs = async (): Promise<WhyUsItem[]> => {
+  const { data } = await api.get<{ data?: Omit<WhyUsItem, 'image'>[] }>('/v1/why-use-list');
+  return (data.data ?? []).map((item) => ({
+    ...item,
+    image: getImageUrl(item.banner),
+  }));
+};
+
 export const useWhyUs = () => {
-  const [whyUsItems, setWhyUsItems] = useState<WhyUsItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isPending, error } = useQuery({
+    queryKey: ['why-us-list'],
+    queryFn: fetchWhyUs,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/why-use-list`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((res) => {
-        if (cancelled) return;
-        const formatted: WhyUsItem[] = (res.data ?? []).map((item: Omit<WhyUsItem, 'image'>) => ({
-          ...item,
-          image: getImageUrl(item.banner),
-        }));
-        setWhyUsItems(formatted);
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err.message);
-        console.error("Why Us fetch failed:", err);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, []);
-
-  return { whyUsItems, loading, error };
-}
+  return {
+    whyUsItems: data ?? [],
+    loading: isPending && !data,
+    error: error instanceof Error ? error.message : null,
+  };
+};

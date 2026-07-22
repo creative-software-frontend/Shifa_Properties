@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { Project } from '../types';
 import PageTransition from '../components/PageTransition';
 import { useLanguage } from '../context/LanguageContext';
@@ -27,6 +27,8 @@ const ProjectsPage: React.FC = () => {
     lang === 'EN' ? obj.en : obj.bn;
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQuery = (searchParams.get('q') || '').trim().toLowerCase();
 
   const { projects, loading } = useProjects();
   const { categories } = useProjectCategories();
@@ -39,13 +41,33 @@ const ProjectsPage: React.FC = () => {
 
   const [selected, setSelected] = useState<Project | null>(null);
 
+  // When arriving from footer portfolio links, reset category to All so search can match.
+  useEffect(() => {
+    if (searchQuery) setActiveFilter('All');
+  }, [searchQuery]);
 
-  const filtered = activeFilter === 'All'
-    ? projects
-    : projects.filter((project) => {
-        const cat = project.category;
-        return typeof cat === 'string' ? cat === activeFilter : cat?.title === activeFilter;
-      });
+
+  const filtered = projects.filter((project) => {
+    const cat = project.category;
+    const catTitle = typeof cat === 'string' ? cat : cat?.title;
+    const matchesCategory = activeFilter === 'All' || catTitle === activeFilter;
+
+    if (!matchesCategory) return false;
+    if (!searchQuery) return true;
+
+    const haystack = [
+      project.title,
+      project.name,
+      project.location,
+      project.description,
+      catTitle,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    return haystack.includes(searchQuery);
+  });
 
 
 
@@ -297,9 +319,23 @@ const ProjectsPage: React.FC = () => {
 
               <p className="text-gray-400">
 
-                No projects found.
+                {searchQuery
+                  ? (lang === 'EN'
+                    ? `No projects found matching “${searchQuery}”.`
+                    : `“${searchQuery}” এর সাথে মিলে কোনো প্রকল্প পাওয়া যায়নি।`)
+                  : 'No projects found.'}
 
               </p>
+
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => navigate('/projects')}
+                  className="mt-4 text-xs font-bold uppercase tracking-wider text-[#C9A84C] underline"
+                >
+                  {lang === 'EN' ? 'View all projects' : 'সব প্রকল্প দেখুন'}
+                </button>
+              )}
 
             </div>
 

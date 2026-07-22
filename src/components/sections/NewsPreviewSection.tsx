@@ -60,12 +60,15 @@ const NewsPreviewSection: React.FC = () => {
           variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }}
         >
           {preview.map((article) => (
-            <motion.a
-              key={article.id} href="#" target="_blank" rel="noopener noreferrer"
-              id={`news-preview-${article.id}`} variants={fadeInUp}
+            <motion.div
+              key={article.id} variants={fadeInUp}
+              whileHover={{ boxShadow: 'var(--shadow-card-lg)', y: -6 }}
+            >
+            <Link
+              to={`/news/${article.id}`}
+              id={`news-preview-${article.id}`}
               className="bg-white rounded-3xl overflow-hidden block select-none hover:no-underline transition-all duration-300 group"
               style={{ boxShadow: 'var(--shadow-card)' }}
-              whileHover={{ boxShadow: 'var(--shadow-card-lg)', y: -6 }}
             >
               {/* Image Container */}
               <div className="relative h-52 overflow-hidden">
@@ -102,7 +105,8 @@ const NewsPreviewSection: React.FC = () => {
                   {pick(n.readMore, lang)} <span className="text-sm">→</span>
                 </div>
               </div>
-            </motion.a>
+            </Link>
+            </motion.div>
           ))}
         </motion.div>
 

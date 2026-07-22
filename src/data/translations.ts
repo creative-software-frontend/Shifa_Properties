@@ -38,6 +38,7 @@ export const UI = {
       subtitle: { en: "Bangladesh's leading hotel development & investment company", bn: 'বাংলাদেশের শীর্ষ হোটেল উন্নয়ন ও বিনিয়োগ কোম্পানি' },
     },
     contact: {
+      label: { en: 'Get In Touch', bn: 'যোগাযোগ করুন' },
       title: { en: 'CONTACT US', bn: 'যোগাযোগ করুন' },
       subtitle: { en: 'Get in touch with Shifa Properties Ltd Group', bn: 'শিফা প্রপার্টিজ লিমিটেড গ্রুপের সাথে যোগাযোগ করুন' },
     },

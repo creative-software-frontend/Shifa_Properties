@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useNews } from '../hooks/useNews';
 import PageTransition from '../components/PageTransition';
 import { useLanguage } from '../context/LanguageContext';
@@ -87,10 +88,8 @@ const NewsPage: React.FC = () => {
 
           {/* ── FEATURED HERO ARTICLE LAYER (First item when view state is set to 'All') ── */}
           {activeCategory === 'All' && filtered.length > 0 && (
-            <a
-             href="#"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to={`/news/${filtered[0].id}`}
               id="news-featured-article"
               className="bg-white rounded-3xl overflow-hidden mb-12 block select-none hover:no-underline transition-all duration-300 group animate-fade-up"
               style={{ boxShadow: 'var(--shadow-card-lg)' }}
@@ -135,17 +134,15 @@ const NewsPage: React.FC = () => {
                   </span>
                 </div>
               </div>
-            </a>
+            </Link>
           )}
 
           {/* ── STANDARD ARTICLES ARCHIVE GRID ── */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {(activeCategory === 'All' ? filtered.slice(1) : filtered).map((article, idx) => (
-              <a
+              <Link
                 key={article.id}
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
+                to={`/news/${article.id}`}
                 id={`news-article-${article.id}`}
                 className="bg-white rounded-3xl overflow-hidden block select-none hover:no-underline transition-all duration-300 group animate-fade-up"
                 style={{ animationDelay: `${idx * 0.08}s`, boxShadow: 'var(--shadow-card)' }}
@@ -185,7 +182,7 @@ const NewsPage: React.FC = () => {
                     {pick(UI.news.readMore, lang)} <span className="text-sm">→</span>
                   </div>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
 
